@@ -1,0 +1,13 @@
+*.o
+.bash_history
+.bashrc
+*.bin
+*.img
+*.sys
+*.qcow2
+*.vmdk
+compile.sh
+.idea/*
+.idea
+.DS_Store
+.vscode
