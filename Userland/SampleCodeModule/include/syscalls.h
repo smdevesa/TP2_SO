@@ -19,6 +19,31 @@
 #define STDIN_FD 0x00
 #define STDOUT_FD 0x01
 
+/*
+ * getRegisters data
+ */
+#define REGS_AMOUNT 17
+
+enum registers_idx {
+    RAX_IDX = 0,
+    RBX_IDX,
+    RCX_IDX,
+    RDX_IDX,
+    RSI_IDX,
+    RDI_IDX,
+    RBP_IDX,
+    R8_IDX,
+    R9_IDX,
+    R10_IDX,
+    R11_IDX,
+    R12_IDX,
+    R13_IDX,
+    R14_IDX,
+    R15_IDX,
+    RIP_IDX,
+    RSP_IDX
+};
+
 /**
  * @brief Reads a string from the file descriptor.
  * @param fd file descriptor
@@ -84,10 +109,12 @@ uint64_t _sys_getTime(uint64_t arg);
 uint64_t _sys_setFontScale(uint64_t scale);
 
 /**
- * @brief Sets the action to be executed when Ctrl + R is pressed.
- * @param action the action to set.
+ * @brief Fills the registers array with the current values of the registers.
+ * Registers need to be updated using CTRL + R before calling this function.
+ * @param regs the buffer to store the registers. Must be at least 17 elements.
+ * @return 1 if the registers were written successfully, 0 otherwise.
  */
-uint64_t _sys_setCtrlRAction(void (*action)(void));
+uint64_t _sys_getRegisters(uint64_t * regs);
 
 /**
  * @brief Sleeps the current process for the given amount of milliseconds.

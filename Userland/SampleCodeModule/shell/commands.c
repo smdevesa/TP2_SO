@@ -4,7 +4,6 @@
 #include <time.h>
 #include <syscalls.h>
 #include <eliminator.h>
-#include <regsmanager.h>
 
 #define HELP_IDX 0
 #define CLEAR_IDX 1
@@ -52,6 +51,11 @@ static int (*commandFunctions[])(int argc, char * argv[]) = {
     eliminatorCommand,
     exceptionCommand
 };
+
+static const char * regNames[REGS_AMOUNT] = {
+        "RAX", "RBX", "RCX", "RDX", "RSI", "RDI", "RBP", "R8 ", "R9 ", "R10", "R11", "R12", "R13", "R14", "R15", "RIP", "RSP"
+};
+
 static int helpCommand(int argc, char * argv[]) {
     for(int i=0; i<COMMANDS_COUNT; i++) {
         printStringColor(commands[i][0], COMMAND_SECONDARY_COLOR);
@@ -93,12 +97,10 @@ static int fontscaleCommand(int argc, char * argv[]) {
 
 static int inforegCommand(int argc, char * argv[]) {
     uint64_t regs[REGS_AMOUNT];
-    if(!regsUpdated()) {
+    int ok = _sys_getRegisters(regs);
+    if(!ok) {
         printError("inforeg", "Registers are not updated. Use CTRL + R to update.", NULL);
         return ERROR;
-    }
-    for(int i=0; i<REGS_AMOUNT; i++) {
-        regs[i] = getRegValue(i);
     }
     char changed = 0;
     if(scale == 3) {
@@ -106,10 +108,10 @@ static int inforegCommand(int argc, char * argv[]) {
         setFontScale(2);
     }
     for(int i=0; i<REGS_AMOUNT; i += 2) {
-        printStringColor(getRegName(i), COMMAND_SECONDARY_COLOR);
+        printStringColor(regNames[i], COMMAND_SECONDARY_COLOR);
         printf(": %x\t", regs[i]);
         if(i < (REGS_AMOUNT - 1)) {
-            printStringColor(getRegName(i + 1), COMMAND_SECONDARY_COLOR);
+            printStringColor(regNames[i + 1], COMMAND_SECONDARY_COLOR);
             printf(": %x\n", regs[i + 1]);
         }
         else

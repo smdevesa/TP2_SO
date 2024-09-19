@@ -8,7 +8,7 @@ GLOBAL _sys_getScreenInfo
 GLOBAL _sys_getFontInfo
 GLOBAL _sys_getTime
 GLOBAL _sys_setFontScale
-GLOBAL _sys_setCtrlRAction
+GLOBAL _sys_getRegisters
 GLOBAL _sys_sleep
 GLOBAL _sys_playSound
 
@@ -30,6 +30,6 @@ _sys_getScreenInfo: syscall 0x05
 _sys_getFontInfo: syscall 0x06
 _sys_getTime: syscall 0x07
 _sys_setFontScale: syscall 0x08
-_sys_setCtrlRAction: syscall 0x09
+_sys_getRegisters: syscall 0x09
 _sys_sleep: syscall 0x0A
 _sys_playSound: syscall 0x0B

@@ -127,12 +127,8 @@ uint64_t sys_setFontScale(uint64_t scale) {
     return setScale(scale);
 }
 
-uint64_t sys_setCtrlRAction(void (*action)(void)) {
-    if(action != NULL) {
-        setCtrlRAction(action);
-        return 1;
-    }
-    return 0;
+uint64_t sys_getRegisters(uint64_t * r) {
+    return getRegisters(r);
 }
 
 uint64_t sys_sleep(uint64_t millis) {

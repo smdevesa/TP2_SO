@@ -1,13 +1,16 @@
 #include <keyboardDriver.h>
-#include <stddef.h>
+#include <syscall_lib.h>
 
 extern uint8_t _getScancode();
+extern void _updateRegisters();
+extern uint64_t * _getRegisters();
 static char scancodeToAscii(uint8_t scancode);
 static void updateFlags(uint8_t scancode);
 static int cb_isEmpty();
 static char cb_push(char c);
 static char cb_pop();
 static int cb_isfull();
+static void updateRegisters();
 
 /*
  * Keycode matrix:
@@ -46,17 +49,17 @@ static volatile uint8_t activeShift = 0;
 static volatile uint8_t activeCapsLock = 0;
 static volatile uint8_t activeCtrl = 0;
 
-// User CTRL + R function
-static void (*ctrlRAction)(void) = NULL;
+static volatile uint64_t registers[REGS_AMOUNT];
+
+static volatile uint8_t registersFilled = 0;
 
 void keyboard_handler() {
     uint8_t scancode = _getScancode();
     updateFlags(scancode);
     char ascii = scancodeToAscii(scancode);
     if(activeCtrl && (ascii == 'r' || ascii == 'R')) {
-        if (ctrlRAction != NULL) {
-            ctrlRAction();
-        }
+        registersFilled = 1;
+        updateRegisters();
     }
     else if (ascii != 0) {
         cb_push(ascii);
@@ -127,8 +130,21 @@ static char cb_pop() {
     return c;
 }
 
-void setCtrlRAction(void (*action)(void)) {
-    if(action != NULL) {
-        ctrlRAction = action;
+void updateRegisters() {
+    _updateRegisters();
+    uint64_t * r = _getRegisters();
+    for(int i = 0; i < REGS_AMOUNT; i++) {
+        registers[i] = r[i];
     }
 }
+
+uint64_t getRegisters(uint64_t * r) {
+    if(!registersFilled) {
+        return 0;
+    }
+    for(int i = 0; i < REGS_AMOUNT; i++) {
+        r[i] = registers[i];
+    }
+    return 1;
+}
+
