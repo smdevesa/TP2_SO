@@ -3,6 +3,9 @@
 #include <lib.h>
 #include <moduleLoader.h>
 #include <idtLoader.h>
+#include <memory_manager.h>
+#include <test_util.h>
+
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -47,5 +50,9 @@ void * initializeKernelBinary()
 int main()
 {
     load_idt();
-	return ((EntryPoint)sampleCodeModuleAddress)();
+    void *mem = START_FREE_MEM;
+    my_mem_init(mem, MEM_SIZE);
+    test_mm(1, (char *[]){"131072"});
+    return ((EntryPoint)sampleCodeModuleAddress)();
+
 }
