@@ -33,7 +33,7 @@ void shell() {
     printf(WELCOME_MESSAGE, getDay(), getMonth(), getYear());
     char input[MAX_COMMAND_SIZE];
     char copy[MAX_COMMAND_SIZE];
-    int returned;
+    int returned = OK;
 
     if(username == NULL) {
         // Default username
