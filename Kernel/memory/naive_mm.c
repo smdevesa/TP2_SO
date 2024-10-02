@@ -10,7 +10,7 @@
 #define MAX_BLOCKS 128
 
 static void * start;
-static int current, blocksQty;
+static int current;
 static uint64_t size;
 static void * freeBlocks[MAX_BLOCKS];
 
@@ -22,9 +22,6 @@ void my_mem_init(void * m, uint32_t s) {
     for(int i=0; i<MAX_BLOCKS; i++) {
         freeBlocks[i] = start + (i * BLOCK_SIZE);
     }
-    //blocksQty = size / BLOCK_SIZE;
-    if(blocksQty > MAX_BLOCKS) blocksQty = MAX_BLOCKS;
-
 }
 
 
