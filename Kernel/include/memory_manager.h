@@ -4,7 +4,7 @@
 
 #ifndef UNTITLED_MEMORY_MANAGER_H
 #define UNTITLED_MEMORY_MANAGER_H
-#define START_FREE_MEM ((void *)520000)
+#define START_FREE_MEM ((void *)0x600000)
 #define MEM_SIZE 131072
 
 #include <stdint.h>
