@@ -52,7 +52,5 @@ int main()
     load_idt();
     void *mem = START_FREE_MEM;
     my_mem_init(mem, MEM_SIZE);
-    test_mm(1, (char *[]){"131072"});
     return ((EntryPoint)sampleCodeModuleAddress)();
-
 }
