@@ -63,7 +63,7 @@ void *getNextProcessRSP(void *prevRSP) {
 
 int64_t addProcess(mainFunction main, char **argv, char *name, uint8_t unkillable) {
     if(scheduler == NULL || scheduler->processCount >= MAX_PROCESSES) return NO_PID;
-    process_t *p = createProcessStructure(scheduler->nextUnusedPid, scheduler->currentPid != NO_PID ? scheduler->currentPid : 0, NO_PID, argv, name, unkillable);
+    process_t *p = createProcessStructure(scheduler->nextUnusedPid, scheduler->currentPid != NO_PID ? scheduler->currentPid : 0, NO_PID, main, argv, name, unkillable);
     if(p == NULL) return NO_PID;
 
     scheduler->processes[scheduler->nextUnusedPid] = p;
@@ -84,3 +84,14 @@ void freeScheduler() {
     scheduler = NULL;
 }
 
+int16_t killProcess(uint16_t pid) {
+    if(scheduler == NULL || scheduler->processCount == 0) return -1;
+    if(pid < 0 || pid >= MAX_PROCESSES || scheduler->processes[pid] == NULL) return -1;
+    if(scheduler->processes[pid]->unkillable) return -1;
+
+    freeProcessStructure(scheduler->processes[pid]);
+    scheduler->processes[pid] = NULL;
+    if(scheduler->processCount > 0) scheduler->processCount--;
+    scheduler->nextUnusedPid = pid;
+    return 0;
+}

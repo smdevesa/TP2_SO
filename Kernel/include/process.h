@@ -7,6 +7,8 @@
 
 #include <stdint.h>
 
+typedef int (*mainFunction)(int argc, char **argv);
+
 typedef enum status {
     READY,
     BLOCKED,
@@ -21,6 +23,7 @@ typedef struct Process {
     uint16_t waitingForPid;
     void *stackBase;
     void *stackPos;
+    mainFunction main;
     char **argv;
     char *name;
     processStatus_t status;
@@ -28,7 +31,7 @@ typedef struct Process {
     int32_t retValue;
 } process_t;
 
-process_t *createProcessStructure(uint16_t pid, uint16_t parentPid, uint16_t waitingForPid, char **argv, char *name, uint8_t unkillable);
+process_t *createProcessStructure(uint16_t pid, uint16_t parentPid, uint16_t waitingForPid, mainFunction main, char **argv, char *name, uint8_t unkillable);
 void freeProcessStructure(process_t *p);
 
 #endif //TP2_SO_PROCESS_H

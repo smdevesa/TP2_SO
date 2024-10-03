@@ -8,7 +8,7 @@
 
 #define STACK_SIZE 4096
 
-process_t * createProcessStructure(uint16_t pid, uint16_t parentPid, uint16_t waitingForPid, char **argv, char *name, uint8_t unkillable) {
+process_t * createProcessStructure(uint16_t pid, uint16_t parentPid, uint16_t waitingForPid, mainFunction main, char **argv, char *name, uint8_t unkillable) {
     process_t * p = my_malloc(sizeof(process_t));
     if(p == NULL) return NULL;
 
@@ -21,6 +21,7 @@ process_t * createProcessStructure(uint16_t pid, uint16_t parentPid, uint16_t wa
         return NULL;
     }
     p->stackPos = p->stackBase + STACK_SIZE;
+    p->main = main;
     p->argv = argv;
     p->name = name;
     p->unkillable = unkillable;

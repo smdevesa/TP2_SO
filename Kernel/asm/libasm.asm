@@ -95,7 +95,5 @@ _inb:
     pop rdx
     ret
 
-
-
 section .bss
 _registersMemory resq 17

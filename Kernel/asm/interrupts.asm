@@ -16,6 +16,8 @@ GLOBAL _irq80Handler
 GLOBAL _exception6Handler
 GLOBAL _exception0Handler
 
+GLOBAL _initialize_stack_frame
+
 GLOBAL _getSnapshot
 
 EXTERN irqDispatcher
@@ -198,6 +200,25 @@ _irq80Handler:
     call syscallDispatcher
     popState 0
     iretq
+
+; extern void _initialize_stack_frame();
+_initialize_stack_frame:
+	mov r8, rsp
+	mov r9, rbp
+	mov rsp, rdx
+	mov rbp, rdx
+	push 0x0
+	push rdx
+	push 0x202
+	push 0x8
+	push rdi
+	mov rdi, rsi
+	mov rsi, rcx
+	pushState 1
+	mov rax, rsp
+	mov rsp, r8
+	mov rbp, r9
+	ret
 
 
 ;Zero Division Exception

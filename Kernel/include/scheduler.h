@@ -6,10 +6,9 @@
 #define TP2_SO_SCHEDULER_H
 
 #include <stdint.h>
+#include <process.h>
 
 #define MAX_PROCESSES 32
-
-typedef int (*mainFunction)(int argc, char **argv);
 
 typedef struct schedulerCDT * schedulerADT;
 

@@ -6,5 +6,6 @@
 #define TP2_SO_MEMORYPOSITIONS_H
 
 #define SCHEDULER_ADDRESS ((void *)0x60000)
+#define START_FREE_MEM ((void *)0x600000)
 
 #endif //TP2_SO_MEMORYPOSITIONS_H
