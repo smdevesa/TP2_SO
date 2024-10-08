@@ -4,8 +4,9 @@
 #include <moduleLoader.h>
 #include <idtLoader.h>
 #include <memory_manager.h>
-#include <test_util.h>
-
+#include <scheduler.h>
+#include <process.h>
+#include <syscall_lib.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -47,10 +48,57 @@ void * initializeKernelBinary()
 	return getStackBase();
 }
 
+int sampleProcessFunction1(int argc, char ** argv) {
+    // Lógica del proceso 1
+    while (1) {
+        // Realiza alguna acción o imprime un mensaje
+        sys_write(1, "Running Process 1\n", 18, 0x00FFFFFF);
+        sys_sleep(1000);
+        // Implementar un mecanismo para dar tiempo a otros procesos
+    }
+    return 0;
+}
+
+int sampleProcessFunction2(int argc, char ** argv) {
+    // Lógica del proceso 2
+    while (1) {
+        // Realiza alguna acción o imprime un mensaje
+        sys_write(1, "Running Process 2\n", 18, 0x00FFFFFF);
+        sys_sleep(1000);
+        // Implementar un mecanismo para dar tiempo a otros procesos
+    }
+    return 0;
+}
+
+int sampleProcessFunction3(int argc, char ** argv) {
+    // Lógica del proceso 3
+    while (1) {
+        // Realiza alguna acción o imprime un mensaje
+        sys_write(1, "Running Process 3\n", 18, 0x00FFFFFF);
+        sys_sleep(1000);
+        // Implementar un mecanismo para dar tiempo a otros procesos
+    }
+    return 0;
+}
+
+
+
+void testScheduler() {
+    // Agregar procesos de prueba
+    addProcess(sampleProcessFunction1, NULL, "Process 1", 1, 0);
+    addProcess(sampleProcessFunction2, NULL, "Process 2", 2, 0);
+    addProcess(sampleProcessFunction3, NULL, "Process 3", 1, 0);
+    sys_write(1, "Starting scheduler\n", 19, 0x00FFFFFF);
+}
+
 int main()
 {
     load_idt();
     void *mem = START_FREE_MEM;
     my_mem_init(mem, MEM_SIZE);
+    createScheduler();
+    sys_write(1, "Initializing kernel\n", 21, 0x00FFFFFF);
+    sys_sleep(3000);
+    testScheduler();
     return ((EntryPoint)sampleCodeModuleAddress)();
 }
