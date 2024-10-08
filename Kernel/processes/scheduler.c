@@ -11,9 +11,11 @@
 
 typedef struct schedulerCDT {
     process_t *processes[MAX_PROCESSES];
+    process_t *processesPriority[MAX_PROCESSES * MAX_PRIORITY];
     int16_t currentPid;
     uint8_t nextUnusedPid;
     uint8_t processCount;
+    uint8_t totalPriorityCount;
 } schedulerCDT;
 
 static schedulerADT scheduler = NULL;
@@ -61,12 +63,18 @@ void *getNextProcessRSP(void *prevRSP) {
     return scheduler->processes[nextPid]->stackPos;
 }
 
-int64_t addProcess(mainFunction main, char **argv, char *name, uint8_t unkillable) {
+int64_t addProcess(mainFunction main, char **argv, char *name,uint8_t priority, uint8_t unkillable) {
     if(scheduler == NULL || scheduler->processCount >= MAX_PROCESSES) return NO_PID;
-    process_t *p = createProcessStructure(scheduler->nextUnusedPid, scheduler->currentPid != NO_PID ? scheduler->currentPid : 0, NO_PID, main, argv, name, unkillable);
+    process_t *p = createProcessStructure(scheduler->nextUnusedPid, scheduler->currentPid != NO_PID ? scheduler->currentPid : 0, NO_PID, main, argv, name, priority ,unkillable);
+
     if(p == NULL) return NO_PID;
 
     scheduler->processes[scheduler->nextUnusedPid] = p;
+
+    for(int i = 0; i < priority; i++){
+        scheduler -> processesPriority[scheduler->totalPriorityCount + i] = p;
+    }
+    scheduler->totalPriorityCount += priority;
     scheduler->processCount++;
 
     while(scheduler->processes[scheduler->nextUnusedPid] != NULL) {
