@@ -10,6 +10,7 @@
 
 #define MAX_PROCESSES 32
 #define MAX_PRIORITY 4
+#define MIN_PRIORITY 1
 
 typedef struct schedulerCDT * schedulerADT;
 

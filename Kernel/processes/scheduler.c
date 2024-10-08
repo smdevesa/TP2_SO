@@ -8,21 +8,28 @@
 #include <stddef.h>
 #include <syscall_lib.h>
 
+extern void _hlt();
+
 #define NO_PID -1
 #define PRIORITY_SIZE (MAX_PROCESSES * MAX_PRIORITY)
 
 typedef struct schedulerCDT {
     process_t *processes[MAX_PROCESSES];
-    process_t *processesPriority[PRIORITY_SIZE];
-    int16_t currentPid;
-    uint8_t nextUnusedPid;
+    int16_t current;
     uint8_t processCount;
-    uint8_t totalPriorityCount;
 } schedulerCDT;
 
 static schedulerADT scheduler = NULL;
 
-static int16_t getNextProcessPID();
+static int idleProcessMain(int argc, char **argv);
+static process_t * getNextProcess();
+
+static int idleProcessMain(int argc, char **argv) {
+    while(1) {
+        _hlt();
+    }
+    return 0;
+}
 
 schedulerADT createScheduler() {
     if(scheduler != NULL) return scheduler;
@@ -30,9 +37,11 @@ schedulerADT createScheduler() {
     for(int i = 0; i < MAX_PROCESSES; i++) {
         scheduler->processes[i] = NULL;
     }
-    scheduler->nextUnusedPid = 0;
     scheduler->processCount = 0;
-    scheduler->currentPid = NO_PID;
+    scheduler->current = NO_PID;
+
+    addProcess((mainFunction)idleProcessMain, (char **){NULL}, "Idle Process",
+               MIN_PRIORITY, 1);
     return scheduler;
 }
 
@@ -40,57 +49,62 @@ schedulerADT getScheduler() {
     return scheduler;
 }
 
-static int16_t getNextProcessPID() {
-    if (scheduler->processCount == 0) return NO_PID;
 
-    for (int i = 0; i < scheduler->totalPriorityCount; i++) {
-        process_t *p = scheduler->processesPriority[i];
-        if (p != NULL && p->status == READY) {
-            return p->pid;
+static process_t * getNextProcess() {
+    if(scheduler == NULL) return NULL;
+    if(scheduler->processCount == 0) return NULL;
+
+    uint16_t start = (scheduler->current == NO_PID) ? 0 : scheduler->current;
+    uint16_t current = start;
+
+    do {
+        current = (current + 1) % MAX_PROCESSES;
+        if(scheduler->processes[current] != NULL && scheduler->processes[current]->status == READY) {
+            scheduler->current = current;
+            return scheduler->processes[current];
         }
-    }
-    return NO_PID;
+    } while(start != current);
+    return NULL;
 }
 
 void * schedule(void *prevRSP) {
-    sys_write(1, "Scheduling\n", 11, 0x00FFFFFF);
-    if (scheduler == NULL || scheduler->processCount == 0) return prevRSP;
-
-    if (scheduler->processes[scheduler->currentPid] != NULL &&
-        scheduler->processes[scheduler->currentPid]->status == RUNNING) {
-        scheduler->processes[scheduler->currentPid]->stackPos = prevRSP;
-        scheduler->processes[scheduler->currentPid]->status = READY;
+    if(scheduler == NULL) return prevRSP;
+    if(scheduler->processCount == 0) return prevRSP;
+    if (scheduler->current != NO_PID) {
+        process_t *currentProcess = scheduler->processes[scheduler->current];
+        currentProcess->stackPos = prevRSP;
     }
 
-    int16_t nextPid = getNextProcessPID();
-    if (nextPid == NO_PID) return prevRSP;
+    process_t *nextProcess = getNextProcess();
+    if (nextProcess == NULL) {
+        nextProcess = scheduler->processes[0];
+    }
 
-    scheduler->currentPid = nextPid;
-    scheduler->processes[nextPid]->status = RUNNING;
-    return scheduler->processes[nextPid]->stackPos;
+    scheduler->current = nextProcess->pid;
+    uint64_t nextRSP = (uint64_t)nextProcess->stackPos;
+    nextProcess->status = RUNNING;
+
+    return nextRSP;
 }
+
 
 
 int64_t addProcess(mainFunction main, char **argv, char *name, uint8_t priority, uint8_t unkillable) {
-    if(scheduler == NULL || scheduler->processCount >= MAX_PROCESSES) return NO_PID;
-    if(priority > MAX_PRIORITY || (scheduler->totalPriorityCount + priority) > PRIORITY_SIZE) return NO_PID;
+    if(scheduler == NULL) return NO_PID;
+    if(scheduler->processCount >= MAX_PROCESSES) return NO_PID;
+    if(priority < MIN_PRIORITY || priority > MAX_PRIORITY) return NO_PID;
 
-    process_t *p = createProcessStructure(scheduler->nextUnusedPid, scheduler->currentPid != NO_PID ? scheduler->currentPid : 0, NO_PID, main, argv, name, priority, unkillable);
-    if(p == NULL) return NO_PID;
+    uint16_t newPid = scheduler->processCount;
+    uint16_t parentPid = (scheduler->current != NO_PID) ? scheduler->current : NO_PID;
 
-    scheduler->processes[scheduler->nextUnusedPid] = p;
+    process_t *newProcess = createProcessStructure(newPid, parentPid, NO_PID, main, argv, name, priority, unkillable);
+    if (newProcess == NULL) return NO_PID;
 
-    for(int i = 0; i < priority; i++){
-        scheduler -> processesPriority[scheduler->totalPriorityCount + i] = p;
-    }
-    scheduler->totalPriorityCount += priority;
+    scheduler->processes[newPid] = newProcess;
     scheduler->processCount++;
-
-    while(scheduler->processes[scheduler->nextUnusedPid] != NULL) {
-        scheduler->nextUnusedPid = (scheduler->nextUnusedPid + 1) % MAX_PROCESSES;
-    }
-    return p->pid;
+    return newPid;
 }
+
 
 void freeScheduler() {
     for(int i = 0; i < MAX_PROCESSES; i++) {
@@ -102,29 +116,17 @@ void freeScheduler() {
 }
 
 int16_t killProcess(uint16_t pid) {
-    if (scheduler == NULL || scheduler->processCount == 0) return -1;
-    if (pid < 0 || pid >= MAX_PROCESSES || scheduler->processes[pid] == NULL) return -1;
-    if (scheduler->processes[pid]->unkillable) return -1;
+    if(scheduler == NULL) return -1;
+    if(pid >= MAX_PROCESSES) return -1;
+    if(scheduler->processes[pid] == NULL) return -1;
+    if(scheduler->processes[pid]->unkillable) return -1;
 
-    freeProcessStructure(scheduler->processes[pid]);
+    process_t *process = scheduler->processes[pid];
+    if(process->status == DEAD) return -1;
+
+    freeProcessStructure(process);
     scheduler->processes[pid] = NULL;
-
-    for (int i = 0; i < scheduler->totalPriorityCount; i++) {
-        if (scheduler->processesPriority[i] != NULL && scheduler->processesPriority[i]->pid == pid) {
-            scheduler->processesPriority[i] = scheduler->processesPriority[scheduler->totalPriorityCount - 1];
-            scheduler->processesPriority[scheduler->totalPriorityCount - 1] = NULL;
-            scheduler->totalPriorityCount--;
-            break;
-        }
-    }
-
-    if (scheduler->processCount > 0) {
-        scheduler->processCount--;
-    }
-
-    scheduler->nextUnusedPid = pid;
+    scheduler->processCount--;
 
     return 0;
 }
-
-
