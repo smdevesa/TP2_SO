@@ -50,7 +50,7 @@ static int16_t getNextProcessPID() {
     return NO_PID;
 }
 
-void *getNextProcessRSP(void *prevRSP) {
+void * schedule(void *prevRSP) {
     if(scheduler == NULL || scheduler->processCount == 0) return prevRSP;
     if(scheduler->processes[scheduler->currentPid] != NULL && scheduler->processes[scheduler->currentPid]->status == RUNNING) {
         scheduler->processes[scheduler->currentPid]->stackPos = prevRSP;

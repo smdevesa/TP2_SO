@@ -15,6 +15,7 @@ typedef struct schedulerCDT * schedulerADT;
 
 schedulerADT createScheduler();
 schedulerADT getScheduler();
+void * schedule(void *prevRSP);
 int64_t addProcess(mainFunction main, char **argv, char *name,uint8_t priority, uint8_t unkillable);
 void freeScheduler();
 

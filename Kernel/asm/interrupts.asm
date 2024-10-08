@@ -17,7 +17,6 @@ GLOBAL _exception6Handler
 GLOBAL _exception0Handler
 
 GLOBAL _initialize_stack_frame
-
 GLOBAL _getSnapshot
 
 EXTERN irqDispatcher
@@ -101,10 +100,11 @@ SECTION .text
 %macro irqHandlerMaster 1
 	pushState 1
 
-	mov rdi, %1 ; pasaje de parametro
+	mov rdi, %1
+	mov rsi, rsp
 	call irqDispatcher
+	mov rsp, rax
 
-	; signal pic EOI (End of Interrupt)
 	mov al, 20h
 	out 20h, al
 
@@ -116,7 +116,7 @@ SECTION .text
 
     fillSnapshot
 
-	mov rdi, %1 ; pasaje de parametro
+	mov rdi, %1
 	call exceptionDispatcher
 
 	call getStackBase
@@ -219,7 +219,6 @@ _initialize_stack_frame:
 	mov rsp, r8
 	mov rbp, r9
 	ret
-
 
 ;Zero Division Exception
 _exception0Handler:

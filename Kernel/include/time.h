@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-void timer_handler();
+void * timer_handler(uint64_t rsp);
 int ticks_elapsed();
 int seconds_elapsed();
 uint64_t ms_elapsed();
