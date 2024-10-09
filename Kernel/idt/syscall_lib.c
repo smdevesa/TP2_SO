@@ -6,6 +6,7 @@
 #include <rtc.h>
 #include <time.h>
 #include <interrupts.h>
+#include <scheduler.h>
 
 #define STDIN 0
 #define STDOUT 1
@@ -158,4 +159,13 @@ uint64_t sys_setBgColor(uint32_t color) {
 
 uint64_t sys_getBgColor() {
     return bgColor;
+}
+
+uint64_t sys_yield() {
+    yield();
+    return 1;
+}
+
+uint64_t sys_getPid() {
+    return getPid();
 }

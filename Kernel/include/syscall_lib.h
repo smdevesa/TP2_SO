@@ -118,4 +118,14 @@ uint64_t sys_setBgColor(uint32_t color);
  */
 uint64_t sys_getBgColor();
 
+/**
+ * @brief Yields the current process.
+ */
+uint64_t sys_yield();
+
+/**
+ * @brief Returns the PID of the current process.
+ */
+uint64_t sys_getPid();
+
 #endif

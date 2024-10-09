@@ -6,6 +6,7 @@
 #include <lib.h>
 
 extern void _hlt();
+extern void _forceNextProcess();
 
 #define NO_PID -1
 #define PRIORITY_SIZE (MAX_PROCESSES * MAX_PRIORITY)
@@ -35,6 +36,7 @@ static int initProcessMain() {
                 }
             }
         }
+        yield();
     }
 
     return 0;
@@ -49,7 +51,7 @@ schedulerADT createScheduler() {
     scheduler->processCount = 0;
     scheduler->current = NO_PID;
 
-    addProcess((mainFunction)&initProcessMain, (char **){NULL}, "Idle Process",
+    addProcess((mainFunction)&initProcessMain, (char **){NULL}, "init",
                MIN_PRIORITY, 1);
     return scheduler;
 }
@@ -114,10 +116,6 @@ int64_t addProcess(mainFunction main, char **argv, char *name, uint8_t priority,
     scheduler->processes[newPid] = newProcess;
     scheduler->processCount++;
 
-    sys_write(1, "Process ", 8, 0x00FFFFFF);
-    char num = newPid + '0';
-    sys_write(1, &num, 1, 0x00FFFFFF);
-    sys_write(1, " created\n", 9, 0x00FFFFFF);
     return newPid;
 }
 
@@ -146,4 +144,12 @@ int16_t killProcess(uint16_t pid, int32_t retValue) {
 
 int16_t killCurrentProcess(int32_t retValue) {
     return killProcess(scheduler->current, retValue);
+}
+
+void yield() {
+    _forceNextProcess();
+}
+
+uint16_t getPid() {
+    return scheduler->current;
 }

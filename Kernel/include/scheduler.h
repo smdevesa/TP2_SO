@@ -20,5 +20,7 @@ void * schedule(void *prevRSP);
 int64_t addProcess(mainFunction main, char **argv, char *name,uint8_t priority, uint8_t unkillable);
 void freeScheduler();
 int16_t killCurrentProcess(int32_t retValue);
+void yield();
+uint16_t getPid();
 
 #endif //TP2_SO_SCHEDULER_H

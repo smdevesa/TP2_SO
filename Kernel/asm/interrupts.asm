@@ -17,12 +17,14 @@ GLOBAL _exception6Handler
 GLOBAL _exception0Handler
 
 GLOBAL _initialize_stack_frame
+GLOBAL _forceNextProcess
 GLOBAL _getSnapshot
 
 EXTERN irqDispatcher
 EXTERN syscallDispatcher
 EXTERN exceptionDispatcher
 EXTERN getStackBase
+EXTERN schedule
 
 section .rodata
     userland equ 0x400000
@@ -153,6 +155,9 @@ _getSnapshot:
    mov rax, regs
    ret
 
+_forceNextProcess:
+    int 20h
+    ret
 
 
 _hlt:
