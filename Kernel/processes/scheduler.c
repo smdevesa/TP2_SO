@@ -22,7 +22,7 @@ static schedulerADT scheduler = NULL;
 static int initProcessMain(int argc, char **argv);
 static process_t * getNextProcess();
 
-static int initProcessMain() {
+static int initProcessMain(int argc, char **argv) {
     addProcess((mainFunction)SHELL_ADDRESS, (char **){NULL}, "Shell",
                MIN_PRIORITY, 1);
 
