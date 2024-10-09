@@ -14,15 +14,15 @@ int64_t my_nice(uint64_t pid, uint64_t newPrio) {
 }
 
 int64_t my_kill(uint64_t pid) {
-  return 0;
+  return killProcess(pid, 0) ;
 }
 
 int64_t my_block(uint64_t pid) {
-  return 0;
+  return blockProcess(pid);
 }
 
 int64_t my_unblock(uint64_t pid) {
-  return 0;
+  return unblockProcess(pid);
 }
 
 int64_t my_sem_open(char *sem_id, uint64_t initialValue) {
@@ -42,7 +42,8 @@ int64_t my_sem_close(char *sem_id) {
 }
 
 int64_t my_yield() {
-  return 0;
+   yield();
+   return 0;
 }
 
 int64_t my_wait(int64_t pid) {

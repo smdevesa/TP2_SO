@@ -22,5 +22,7 @@ void freeScheduler();
 int16_t killCurrentProcess(int32_t retValue);
 void yield();
 uint16_t getPid();
+int blockProcess(uint16_t pid); 
+int unblockProcess(uint16_t pid);
 
 #endif //TP2_SO_SCHEDULER_H
