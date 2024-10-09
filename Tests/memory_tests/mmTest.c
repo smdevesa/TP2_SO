@@ -2,7 +2,7 @@
 // Created by Santiago Devesa on 21/09/2024.
 //
 
-#include "test_util.h"
+#include "../test_util.h"
 #include "memory_manager.h"
 #include <stdio.h>
 #include <stdlib.h>
