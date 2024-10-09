@@ -129,4 +129,14 @@ uint64_t _sys_sleep(uint64_t millis);
  */
 uint64_t _sys_playSound(uint64_t f, uint64_t millis);
 
+/**
+ * @brief Returns the current process id.
+ */
+uint64_t _sys_getpid();
+
+/**
+ * @brief Gives the CPU to the next process.
+ */
+uint64_t _sys_yield();
+
 #endif

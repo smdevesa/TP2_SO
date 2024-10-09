@@ -11,7 +11,8 @@ GLOBAL _sys_setFontScale
 GLOBAL _sys_getRegisters
 GLOBAL _sys_sleep
 GLOBAL _sys_playSound
-
+GLOBAL _sys_yield
+GLOBAL _sys_getpid
 
 section .text
 
@@ -33,3 +34,5 @@ _sys_setFontScale: syscall 0x08
 _sys_getRegisters: syscall 0x09
 _sys_sleep: syscall 0x0A
 _sys_playSound: syscall 0x0B
+_sys_yield: syscall 0x0C
+_sys_getpid: syscall 0x0D
