@@ -52,5 +52,5 @@ int main()
     my_mem_init(START_FREE_MEM, MEM_SIZE);
     createScheduler();
     load_idt();
-    return ((EntryPoint)sampleCodeModuleAddress)();
+    return 0;
 }
