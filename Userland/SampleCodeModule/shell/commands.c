@@ -4,6 +4,7 @@
 #include <time.h>
 #include <syscalls.h>
 #include <eliminator.h>
+#include <test_util.h>
 
 #define HELP_IDX 0
 #define CLEAR_IDX 1
@@ -21,7 +22,8 @@ static char * commands[][2] = {
         {"fontscale", "Sets the font scale. Usage: fontscale [1, 2, 3]"},
         {"inforeg", "Shows the registers values."},
         {"eliminator", "Starts the Eliminator game."},
-        {"exception", "To test exceptions. Usage: exception [zero, invalidOpcode]"}
+        {"exception", "To test exceptions. Usage: exception [zero, invalidOpcode]"},
+        {"test_scheduler", "Tests the scheduler"}
 };
 
 #define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))
@@ -37,6 +39,7 @@ static int eliminatorCommand(int argc, char * argv[]);
 static int fillCommandAndArgs(char ** command, char * args[], char * input);
 static void printError(char * command, char * message, char * usage);
 static int exceptionCommand(int argc, char * argv[]);
+static int testSchedulerCommand(int argc, char * argv[]);
 
 // Default scale
 static int scale = 1;
@@ -49,7 +52,8 @@ static int (*commandFunctions[])(int argc, char * argv[]) = {
     fontscaleCommand,
     inforegCommand,
     eliminatorCommand,
-    exceptionCommand
+    exceptionCommand,
+    testSchedulerCommand
 };
 
 static const char * regNames[REGS_AMOUNT] = {
@@ -200,4 +204,15 @@ static int fillCommandAndArgs(char ** command, char * args[], char * input) {
     for(int i=0; i<argsCount; i++) {
     }
     return argsCount;
+}
+
+static int testSchedulerCommand() {
+    char *args[] = {"20", NULL};
+    int pid = _sys_createProcess((mainFunction)&test_processes, args, "test_processes", 1, 0);
+    printf("pid: %d\n", pid);
+    if(pid == -1) {
+        printError("test_scheduler", "Error creating process.", NULL);
+        return ERROR;
+    }
+    return OK;
 }

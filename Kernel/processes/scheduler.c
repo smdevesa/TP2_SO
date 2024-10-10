@@ -100,9 +100,6 @@ void * schedule(void *prevRSP) {
     uint64_t nextRSP = (uint64_t)nextProcess->stackPos;
     nextProcess->status = RUNNING;
 
-    sys_write(1, "Switching to process: ", 22, 0x00FFFFFF);
-    sys_write(1, nextProcess->name, strlen(nextProcess->name), 0x00FFFFFF);
-    sys_write(1, "\n", 1, 0x00FFFFFF);
     return (void *)nextRSP;
 }
 
