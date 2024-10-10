@@ -135,7 +135,7 @@ void freeScheduler() {
     scheduler = NULL;
 }
 
-int16_t killProcess(uint16_t pid, int32_t retValue) {
+int32_t killProcess(uint16_t pid, int32_t retValue) {
     if(scheduler == NULL) return -1;
     if(pid >= MAX_PROCESSES) return -1;
     if(scheduler->processes[pid] == NULL) return -1;
@@ -170,7 +170,6 @@ int unblockProcess(uint16_t pid){
 
     scheduler->processes[pid]->status = READY;
     return 0;
-
 }
 
 int changePriority(uint16_t pid, uint8_t newPriority){
@@ -185,7 +184,7 @@ int changePriority(uint16_t pid, uint8_t newPriority){
 }
 
 
-int16_t killCurrentProcess(int32_t retValue) {
+int32_t killCurrentProcess(int32_t retValue) {
     return killProcess(scheduler->current, retValue);
 }
 

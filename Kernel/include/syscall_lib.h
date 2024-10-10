@@ -128,4 +128,45 @@ uint64_t sys_yield();
  */
 uint64_t sys_getPid();
 
+/**
+ * @brief Creates a new process.
+ * @param main: the main function of the process.
+ * @param argv: the arguments of the process.
+ * @param name: the name of the process.
+ * @param priority: the priority of the process.
+ * @param unkillable: 1 if the process is unkillable, 0 otherwise.
+ * @return the PID of the new process.
+ */
+int64_t sys_createProcess(uint64_t main, char **argv, char *name, uint8_t priority, uint8_t unkillable);
+
+/**
+ * @brief Blocks the process with the given PID.
+ * @param pid: the PID of the process to block.
+ * @return 0 if the process was blocked successfully, -1 if the process was not blocked.
+ */
+int64_t sys_blockProcess(uint16_t pid);
+
+/**
+ * @brief Unblocks the process with the given PID.
+ * @param pid: the PID of the process to unblock.
+ * @return 0 if the process was unblocked successfully, -1 if the process was not unblocked.
+ */
+int64_t sys_unblockProcess(uint16_t pid);
+
+/**
+ * @brief Changes the priority of the process with the given PID.
+ * @param pid: the PID of the process to change the priority.
+ * @param newPriority: the new priority of the process.
+ * @return 0 if the priority was changed successfully, -1 if the priority was not changed.
+ */
+int64_t sys_changePriority(uint16_t pid, uint8_t newPriority);
+
+/**
+ * @brief Kills the process with the given PID.
+ * @param pid: the PID of the process to kill.
+ * @param retValue: the return value of the process.
+ * @return 0 if the process was killed successfully, -1 if the process was not killed.
+ */
+int64_t sys_killProcess(uint16_t pid);
+
 #endif

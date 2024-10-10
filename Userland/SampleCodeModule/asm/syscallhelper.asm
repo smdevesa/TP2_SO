@@ -13,6 +13,11 @@ GLOBAL _sys_sleep
 GLOBAL _sys_playSound
 GLOBAL _sys_yield
 GLOBAL _sys_getpid
+GLOBAL _sys_createProcess
+GLOBAL _sys_killProcess
+GLOBAL _sys_block
+GLOBAL _sys_unblock
+GLOBAL _sys_changePriority
 
 section .text
 
@@ -36,3 +41,8 @@ _sys_sleep: syscall 0x0A
 _sys_playSound: syscall 0x0B
 _sys_yield: syscall 0x0C
 _sys_getpid: syscall 0x0D
+_sys_createProcess: syscall 0x0E
+_sys_killProcess: syscall 0x0F
+_sys_block: syscall 0x10
+_sys_unblock: syscall 0x11
+_sys_changePriority: syscall 0x12

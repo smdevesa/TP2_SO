@@ -169,3 +169,23 @@ uint64_t sys_yield() {
 uint64_t sys_getPid() {
     return getPid();
 }
+
+int64_t sys_createProcess(uint64_t main, char **argv, char *name, uint8_t priority, uint8_t unkillable) {
+    return addProcess((mainFunction)main, argv, name, priority, unkillable);
+}
+
+int64_t sys_blockProcess(uint16_t pid) {
+    return blockProcess(pid);
+}
+
+int64_t sys_unblockProcess(uint16_t pid) {
+    return unblockProcess(pid);
+}
+
+int64_t sys_changePriority(uint16_t pid, uint8_t newPriority) {
+    return changePriority(pid, newPriority);
+}
+
+int64_t sys_killProcess(uint16_t pid) {
+    return killProcess(pid, 0);
+}
