@@ -22,6 +22,7 @@ process_t *createProcessStructure(uint16_t pid, uint16_t parentPid, uint16_t wai
     p->parentPid = parentPid;
     p->waitingForPid = waitingForPid;
     p->priority = priority;
+    p->remainingQuantum = priority;
     p->unkillable = unkillable;
     p->status = READY;
     p->stackBase = my_malloc(STACK_SIZE);

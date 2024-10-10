@@ -24,5 +24,6 @@ void yield();
 uint16_t getPid();
 int blockProcess(uint16_t pid); 
 int unblockProcess(uint16_t pid);
+int changePriority(uint16_t pid, uint8_t newPriority);
 
 #endif //TP2_SO_SCHEDULER_H

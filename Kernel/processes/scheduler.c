@@ -23,8 +23,8 @@ static int initProcessMain(int argc, char **argv);
 static process_t * getNextProcess();
 
 static int initProcessMain(int argc, char **argv) {
-    addProcess((mainFunction)SHELL_ADDRESS, (char **){NULL}, "Shell",
-               MIN_PRIORITY, 1);
+    addProcess((mainFunction)SHELL_ADDRESS, (char **){NULL}, "shell",
+               2, 1);
 
     while(1) {
         for(int i=0; i<MAX_PROCESSES; i++) {
@@ -64,6 +64,12 @@ schedulerADT getScheduler() {
 static process_t * getNextProcess() {
     if (scheduler->processCount == 0) return NULL;
 
+    process_t *currentProcess = scheduler->processes[scheduler->current];
+    if (currentProcess != NULL && currentProcess->remainingQuantum > 0) {
+        currentProcess->remainingQuantum--;
+        return currentProcess;
+    }
+
     uint16_t start = (scheduler->current == NO_PID) ? 0 : (scheduler->current + 1) % MAX_PROCESSES;
     uint16_t current = start;
 
@@ -71,6 +77,7 @@ static process_t * getNextProcess() {
         if (scheduler->processes[current] != NULL &&
         scheduler->processes[current]->status == READY) {
             scheduler->current = current;
+            scheduler->processes[current]->remainingQuantum = scheduler->processes[current]->priority - 1;
             return scheduler->processes[current];
         }
         current = (current + 1) % MAX_PROCESSES;
@@ -89,14 +96,13 @@ void * schedule(void *prevRSP) {
     }
 
     process_t *nextProcess = getNextProcess();
-    if (nextProcess == NULL) {
-        nextProcess = scheduler->processes[0];
-    }
-
     scheduler->current = nextProcess->pid;
     uint64_t nextRSP = (uint64_t)nextProcess->stackPos;
     nextProcess->status = RUNNING;
 
+    sys_write(1, "Switching to process: ", 22, 0x00FFFFFF);
+    sys_write(1, nextProcess->name, strlen(nextProcess->name), 0x00FFFFFF);
+    sys_write(1, "\n", 1, 0x00FFFFFF);
     return (void *)nextRSP;
 }
 
@@ -167,6 +173,16 @@ int unblockProcess(uint16_t pid){
 
 }
 
+int changePriority(uint16_t pid, uint8_t newPriority){
+    if(scheduler == NULL) return -1;
+    if(pid >= MAX_PROCESSES) return -1;
+    if(scheduler->processes[pid] == NULL) return -1;
+    if(newPriority < MIN_PRIORITY || newPriority > MAX_PRIORITY) return -1;
+
+    scheduler->processes[pid]->priority = newPriority;
+    scheduler->processes[pid]->remainingQuantum = newPriority;
+    return 0;
+}
 
 
 int16_t killCurrentProcess(int32_t retValue) {

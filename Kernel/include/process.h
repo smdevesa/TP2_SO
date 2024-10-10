@@ -25,6 +25,7 @@ typedef struct process {
     char name[MAX_NAME_LENGTH];
     processStatus_t status;
     uint8_t priority;
+    uint8_t remainingQuantum;
     uint8_t unkillable;
     int32_t retValue;
 } process_t;

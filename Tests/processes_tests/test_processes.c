@@ -14,9 +14,7 @@ typedef struct P_rq {
 } p_rq;
 
 int endless_loop(uint64_t argc, char *argv[]) {
-    while (1) {
-
-    }
+    while (1);
     return 0;
 }
 
@@ -25,7 +23,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
     uint8_t alive = 0;
     uint8_t action;
     uint64_t max_processes;
-    char *argvAux[] = {0};
+    char *argvAux[] = {0, NULL};
 
     if (argc != 1)
         return -1;
@@ -45,7 +43,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
                 printf("test_processes: ERROR creating process\n");
                 return -1;
             } else {
-                p_rqs[rq].state = RUNNING;
+                p_rqs[rq].state = State.RUNNING;
                 alive++;
             }
         }
@@ -74,7 +72,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
                                 printf("test_processes: ERROR blocking process\n");
                                 return -1;
                             }
-                            p_rqs[rq].state = BLOCKED;
+                            p_rqs[rq].state = State.BLOCKED;
                         }
                         break;
                 }
@@ -87,7 +85,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
                         printf("test_processes: ERROR unblocking process\n");
                         return -1;
                     }
-                    p_rqs[rq].state = RUNNING;
+                    p_rqs[rq].state = State.RUNNING;
                 }
         }
     }
