@@ -2,7 +2,7 @@
 // Created by Santiago Devesa on 21/09/2024.
 //
 
-#include "../test_util.h"
+#include "../include/test_util.h"
 
 #include <stdint.h>
 #include <stdio.h>

@@ -1,8 +1,6 @@
 #include <stdio.h>
-#include "syscall.h"
-#include "../test_util.h"
-#include "../Kernel/include/process.h"
-
+#include "../include/test_syscall.h"
+#include "../include/test_util.h"
 
 enum State { RUNNING,
              BLOCKED,
@@ -12,11 +10,6 @@ typedef struct P_rq {
   int32_t pid;
   enum State state;
 } p_rq;
-
-int endless_loop(uint64_t argc, char *argv[]) {
-    while (1);
-    return 0;
-}
 
 int64_t test_processes(uint64_t argc, char *argv[]) {
     uint8_t rq;
@@ -37,13 +30,13 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
 
         // Create max_processes processes
         for (rq = 0; rq < max_processes; rq++) {
-            p_rqs[rq].pid = my_create_process("endless_loop", 0, argvAux, (mainFunction)&endless_loop);
+            p_rqs[rq].pid = my_create_process((mainFunction)&endless_loop, argvAux, "endless_loop", 1, 0);
 
             if (p_rqs[rq].pid == -1) {
                 printf("test_processes: ERROR creating process\n");
                 return -1;
             } else {
-                p_rqs[rq].state = State.RUNNING;
+                p_rqs[rq].state = RUNNING;
                 alive++;
             }
         }
@@ -72,7 +65,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
                                 printf("test_processes: ERROR blocking process\n");
                                 return -1;
                             }
-                            p_rqs[rq].state = State.BLOCKED;
+                            p_rqs[rq].state = BLOCKED;
                         }
                         break;
                 }
@@ -85,7 +78,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
                         printf("test_processes: ERROR unblocking process\n");
                         return -1;
                     }
-                    p_rqs[rq].state = State.RUNNING;
+                    p_rqs[rq].state = RUNNING;
                 }
         }
     }

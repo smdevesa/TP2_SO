@@ -157,21 +157,21 @@ int64_t _sys_createProcess(mainFunction main, char **argv, char *name, uint8_t p
  * @param pid the process id.
  * @return 0 if the process was killed successfully, -1 otherwise.
  */
-int64_t _sys_killProcess(uint64_t pid);
+int64_t _sys_kill(uint64_t pid);
 
 /**
  * @brief Blocks a process.
  * @param pid the process id.
  * @return 0 if the process was blocked successfully, -1 otherwise.
  */
-int64_t _sys_blockProcess(uint64_t pid);
+int64_t _sys_block(uint64_t pid);
 
 /**
  * @brief Unblocks a process.
  * @param pid the process id.
  * @return 0 if the process was unblocked successfully, -1 otherwise.
  */
-int64_t _sys_unblockProcess(uint64_t pid);
+int64_t _sys_unblock(uint64_t pid);
 
 /**
  * @brief Changes the priority of a process.
