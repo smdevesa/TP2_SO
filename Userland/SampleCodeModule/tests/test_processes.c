@@ -11,8 +11,7 @@ typedef struct P_rq {
   enum State state;
 } p_rq;
 
-int64_t test_processes(uint64_t argc, char *argv[]) {
-    printf("test_processes\n");
+int64_t test_processes(int argc, char *argv[]) {
     uint8_t rq;
     uint8_t alive = 0;
     uint8_t action;
@@ -26,15 +25,15 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
         return -1;
 
     p_rq p_rqs[max_processes];
+    int count = 0;
 
     while (1) {
 
         // Create max_processes processes
         for (rq = 0; rq < max_processes; rq++) {
             p_rqs[rq].pid = my_create_process((mainFunction)&endless_loop, argvAux, "endless_loop", 1, 0);
-
             if (p_rqs[rq].pid == -1) {
-                printf("test_processes: ERROR creating process\n");
+                printf("test_processes: ERROR creating process, it: %d\n", count);
                 return -1;
             } else {
                 p_rqs[rq].state = RUNNING;
@@ -52,7 +51,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
                     case 0:
                         if (p_rqs[rq].state == RUNNING || p_rqs[rq].state == BLOCKED) {
                             if (my_kill(p_rqs[rq].pid) == -1) {
-                                printf("test_processes: ERROR killing process\n");
+                                printf("test_processes: ERROR killing process, it: %d\n", count);
                                 return -1;
                             }
                             p_rqs[rq].state = KILLED;
@@ -81,6 +80,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
                     }
                     p_rqs[rq].state = RUNNING;
                 }
+            count++;
         }
     }
 }

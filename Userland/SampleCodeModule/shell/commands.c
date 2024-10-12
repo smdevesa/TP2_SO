@@ -23,7 +23,7 @@ static char * commands[][2] = {
         {"inforeg", "Shows the registers values."},
         {"eliminator", "Starts the Eliminator game."},
         {"exception", "To test exceptions. Usage: exception [zero, invalidOpcode]"},
-        {"test_scheduler", "Tests the scheduler"}
+        {"ts", "Tests the scheduler"}
 };
 
 #define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))
@@ -209,7 +209,6 @@ static int fillCommandAndArgs(char ** command, char * args[], char * input) {
 static int testSchedulerCommand() {
     char *args[] = {"20", NULL};
     int pid = _sys_createProcess((mainFunction)&test_processes, args, "test_processes", 1, 0);
-    printf("pid: %d\n", pid);
     if(pid == -1) {
         printError("test_scheduler", "Error creating process.", NULL);
         return ERROR;

@@ -9,7 +9,6 @@ extern void _hlt();
 extern void _forceNextProcess();
 
 #define NO_PID -1
-#define PRIORITY_SIZE (MAX_PROCESSES * MAX_PRIORITY)
 
 typedef struct schedulerCDT {
     process_t *processes[MAX_PROCESSES];
@@ -23,7 +22,9 @@ static int initProcessMain(int argc, char **argv);
 static process_t * getNextProcess();
 
 static int initProcessMain(int argc, char **argv) {
-    addProcess((mainFunction)SHELL_ADDRESS, (char **){NULL}, "shell",
+    sys_write(1, "Initializing scheduler\n", 23, 0x00FFFFFF);
+    char ** args = {NULL};
+    addProcess((mainFunction)SHELL_ADDRESS, args, "shell",
                2, 1);
 
     while(1) {
@@ -51,8 +52,8 @@ schedulerADT createScheduler() {
     scheduler->processCount = 0;
     scheduler->current = NO_PID;
 
-    addProcess((mainFunction)&initProcessMain, (char **){NULL}, "init",
-               MIN_PRIORITY, 1);
+    char *argv[] = {NULL};
+    addProcess((mainFunction)&initProcessMain, argv, "init", MIN_PRIORITY, 1);
     return scheduler;
 }
 
@@ -137,9 +138,14 @@ int32_t killProcess(uint16_t pid, int32_t retValue) {
     if(pid >= MAX_PROCESSES) return -1;
     if(scheduler->processes[pid] == NULL) return -1;
     if(scheduler->processes[pid]->unkillable) return -1;
-
+    /*
     scheduler->processes[pid]->status = TERMINATED;
-    scheduler->processes[pid]->retValue = retValue; 
+    scheduler->processes[pid]->retValue = retValue;
+    */
+
+    freeProcessStructure(scheduler->processes[pid]);
+    scheduler->processes[pid] = NULL;
+    scheduler->processCount--;
 
     return 0;
 }
@@ -164,7 +170,6 @@ int unblockProcess(uint16_t pid){
     if(pid >= MAX_PROCESSES) return -1;
     if(scheduler->processes[pid] == NULL) return -1;
     if (scheduler->processes[pid]->status != BLOCKED) return -1;
-
     scheduler->processes[pid]->status = READY;
     return 0;
 }
