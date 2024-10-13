@@ -206,8 +206,17 @@ static int fillCommandAndArgs(char ** command, char * args[], char * input) {
     return argsCount;
 }
 
-static int testSchedulerCommand() {
-    char *args[] = {"20", NULL};
+static int testSchedulerCommand(int argc, char *argv[]) {
+    if(argc != 1) {
+        printError("test_scheduler", "Invalid amount of arguments.", "ts [processes]");
+        return ERROR;
+    }
+    int processes = atoi(argv[0]);
+    if(processes <= 0 || processes > 25) {
+        printError("test_scheduler", "Invalid amount of processes. Process count must be in [1-25]", NULL);
+        return ERROR;
+    }
+    char * args[] = {argv[0], NULL};
     int pid = _sys_createProcess((mainFunction)&test_processes, args, "test_processes", 1, 0);
     if(pid == -1) {
         printError("test_scheduler", "Error creating process.", NULL);

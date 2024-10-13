@@ -169,4 +169,10 @@ int64_t sys_changePriority(uint16_t pid, uint8_t newPriority);
  */
 int64_t sys_killProcess(uint16_t pid);
 
+/**
+ * @brief Ends the execution of the caller process.
+ * @param retValue: the return value of the caller process.
+ */
+int64_t sys_exit(int64_t retValue);
+
 #endif

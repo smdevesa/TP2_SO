@@ -181,4 +181,10 @@ int64_t _sys_unblock(uint64_t pid);
  */
 int64_t _sys_changePriority(uint64_t pid, uint64_t newPriority);
 
+/**
+ * @brief Ends the execution of the caller process.
+ * @param retValue
+ */
+int64_t _sys_exit(int64_t retValue);
+
 #endif

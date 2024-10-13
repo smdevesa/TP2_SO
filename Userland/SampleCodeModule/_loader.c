@@ -1,5 +1,6 @@
 /* _loader.c */
 #include <stdint.h>
+#include "include/syscalls.h"
 
 extern char bss;
 extern char endOfBinary;
@@ -12,8 +13,9 @@ int _start() {
 	//Clean BSS
 	memset(&bss, 0, &endOfBinary - &bss);
 
-	return main();
-
+	int64_t retValue = main();
+    _sys_exit(retValue);
+    return retValue;
 }
 
 

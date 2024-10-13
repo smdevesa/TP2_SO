@@ -140,9 +140,13 @@ int32_t killProcess(uint16_t pid, int32_t retValue) {
     if(scheduler->processes[pid] == NULL) return -1;
     if(scheduler->processes[pid]->unkillable) return -1;
 
+    uint8_t contextSwitch = scheduler->processes[pid]->status == RUNNING;
     freeProcessStructure(scheduler->processes[pid]);
     scheduler->processes[pid] = NULL;
     scheduler->processCount--;
+    if(contextSwitch){
+        yield();
+    }
 
     return 0;
 }

@@ -18,6 +18,7 @@ GLOBAL _sys_kill
 GLOBAL _sys_block
 GLOBAL _sys_unblock
 GLOBAL _sys_changePriority
+GLOBAL _sys_exit
 
 section .text
 
@@ -46,3 +47,4 @@ _sys_kill: syscall 0x0F
 _sys_block: syscall 0x10
 _sys_unblock: syscall 0x11
 _sys_changePriority: syscall 0x12
+_sys_exit: syscall 0x13
