@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <syscall_lib.h>
 #include <lib.h>
+#include <interrupts.h>
 
 extern void _hlt();
 extern void _forceNextProcess();
@@ -138,10 +139,6 @@ int32_t killProcess(uint16_t pid, int32_t retValue) {
     if(pid >= MAX_PROCESSES) return -1;
     if(scheduler->processes[pid] == NULL) return -1;
     if(scheduler->processes[pid]->unkillable) return -1;
-    /*
-    scheduler->processes[pid]->status = TERMINATED;
-    scheduler->processes[pid]->retValue = retValue;
-    */
 
     freeProcessStructure(scheduler->processes[pid]);
     scheduler->processes[pid] = NULL;

@@ -1,6 +1,7 @@
 #include "../include/iolib.h"
 #include "../include/test_syscall.h"
 #include "../include/test_util.h"
+#include "../include/syscalls.h"
 
 enum State { RUNNING,
              BLOCKED,
@@ -80,7 +81,7 @@ int64_t test_processes(int argc, char *argv[]) {
                     }
                     p_rqs[rq].state = RUNNING;
                 }
-            count++;
         }
+        count++;
     }
 }

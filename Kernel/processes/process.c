@@ -15,6 +15,7 @@ static void acotatedCopy(char *dest, const char *src, size_t size);
 // calls the main function of the process and then kills it
 void processCaller(mainFunction main, char **args);
 static char ** allocArgs(char **args);
+static void freeArgs(char ** args);
 
 process_t *createProcessStructure(uint16_t pid, uint16_t parentPid, uint16_t waitingForPid, mainFunction main, char **argv, char *name, uint8_t priority, uint8_t unkillable) {
     process_t *p = my_malloc(sizeof(process_t));
@@ -46,11 +47,17 @@ process_t *createProcessStructure(uint16_t pid, uint16_t parentPid, uint16_t wai
     return p;
 }
 
+static void freeArgs(char ** args) {
+    if(args == NULL) return;
+    for(int i=0; args[i] != NULL; i++) {
+        my_free(args[i]);
+    }
+    my_free(args);
+}
+
 void freeProcessStructure(process_t *p) {
     if (p == NULL) return;
-    for (int i = 0; p->argv[i] != NULL; i++) {
-        my_free(p->argv[i]);
-    }
+    freeArgs(p->argv);
     my_free(p->stackBase);
     my_free(p);
 }

@@ -5,10 +5,9 @@
 #include "../include/memory_manager.h"
 #include <stdint.h>
 #include <stddef.h>
-#include <syscall_lib.h>
 
 #define BLOCK_SIZE 4096
-#define MAX_BLOCKS 256
+#define MAX_BLOCKS 4096
 
 static void * start;
 static int current;
@@ -31,7 +30,6 @@ void * my_malloc(uint32_t size) {
     if(current < MAX_BLOCKS) {
         return freeBlocks[current++];
     }
-    sys_write(1, "Me quede sin memoria\n", strlen("Me quede sin memoria\n"), 0x00FFFFFF);
     return NULL;
 }
 
