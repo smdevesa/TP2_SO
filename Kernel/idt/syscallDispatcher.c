@@ -3,7 +3,7 @@
 
 enum syscalls {READ = 0, WRITE, RECTANGLE, CLEAR, COORDS, SCREENINFO, FONTINFO, GETTIME, SETSCALE,
         GETREGS, SLEEP, PLAYSOUND, YIELD, GETPID, CREATE_PROCESS, KILL_PROCESS, BLOCK, UNBLOCK, CHANGE_PRIORITY,
-        EXIT, MALLOC, FREE};
+        EXIT, MALLOC, FREE, PS};
 
 uint64_t syscallDispatcher(int64_t rdi, int64_t rsi, int64_t rdx, int64_t rcx, int64_t r8, int64_t rax) {
     // rax contains the syscall id
@@ -30,6 +30,7 @@ uint64_t syscallDispatcher(int64_t rdi, int64_t rsi, int64_t rdx, int64_t rcx, i
         case EXIT: return sys_exit(rdi);
         case MALLOC: return sys_malloc(rdi);
         case FREE: return sys_free(rdi);
+        case PS: return sys_ps();
         default: return 0;
     }
 }

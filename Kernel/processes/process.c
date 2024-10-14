@@ -1,6 +1,5 @@
 #include <process.h>
 #include <memory_manager.h>
-#include <string.h>
 #include <stddef.h>
 #include <scheduler.h>
 #include <lib.h>
@@ -11,7 +10,6 @@
 // create a fake iretq frame
 extern void *_initialize_stack_frame(void (*wrapper)(mainFunction, char **), mainFunction main, void *stackEnd, void *argv);
 static int argsLen(char **array);
-static void acotatedCopy(char *dest, const char *src, size_t size);
 // calls the main function of the process and then kills it
 void processCaller(mainFunction main, char **args);
 static char ** allocArgs(char **args);
@@ -40,7 +38,7 @@ process_t *createProcessStructure(uint16_t pid, uint16_t parentPid, uint16_t wai
         my_free(p);
         return NULL;
     }
-    acotatedCopy(p->name, name, MAX_NAME_LENGTH - 1);
+    strncpy(p->name, name, MAX_NAME_LENGTH - 1);
     p->name[MAX_NAME_LENGTH - 1] = 0;
     p->stackPos = _initialize_stack_frame(&processCaller, main, p->stackPos, (void *) p->argv);
 
@@ -79,13 +77,6 @@ static char ** allocArgs(char **args) {
     }
     newArgs[count] = NULL;
     return newArgs;
-}
-
-static void acotatedCopy(char *dest, const char *src, size_t size) {
-    for (size_t i = 0; i < size; i++) {
-        dest[i] = src[i];
-        if (src[i] == 0) break;
-    }
 }
 
 void processCaller(mainFunction main, char **args) {

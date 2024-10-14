@@ -46,6 +46,25 @@ enum registers_idx {
 
 typedef int (*mainFunction)(int argc, char **argv);
 
+#define MAX_NAME_LENGTH 256
+
+typedef enum status {
+    READY = 0,
+    BLOCKED,
+    RUNNING,
+    TERMINATED
+} processStatus_t;
+
+typedef struct processInfo {
+    int16_t pid;
+    int16_t parent;
+    char name[MAX_NAME_LENGTH];
+    uint8_t priority;
+    uint8_t unkillable;
+    void *stackBase;
+    processStatus_t status;
+} processInfo_t;
+
 /**
  * @brief Reads a string from the file descriptor.
  * @param fd file descriptor
@@ -199,5 +218,12 @@ void *_sys_malloc(uint64_t size);
  * @param ptr: the address of the block.
  */
 void _sys_free(void *ptr);
+
+/**
+ * @brief Returns the process list terminated with a process with pid == -1.
+ */
+processInfo_t * _sys_ps();
+
+
 
 #endif

@@ -188,4 +188,8 @@ uint64_t sys_malloc(uint64_t size);
  */
 uint64_t sys_free(uint64_t ptr);
 
+/**
+ * @brief Returns the process list terminated with a process with pid == -1.
+ */
+uint64_t sys_ps();
 #endif

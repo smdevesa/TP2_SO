@@ -6,8 +6,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+// 256MB
 #define BLOCK_SIZE 4096
-#define MAX_BLOCKS 4096
+#define MAX_BLOCKS 65536
 
 static void * start;
 static int current;
@@ -25,8 +26,9 @@ void my_mem_init(void * m, uint32_t s) {
 }
 
 
-void * my_malloc(uint32_t size) {
-    if(size > BLOCK_SIZE) return NULL;
+void * my_malloc(uint32_t blockSize) {
+
+    if(blockSize > BLOCK_SIZE) return NULL;
     if(current < MAX_BLOCKS) {
         return freeBlocks[current++];
     }

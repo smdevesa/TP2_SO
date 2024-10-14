@@ -24,7 +24,9 @@ size_t strlen(const char *str);
 void reverse(char *str);
 
 
-char * itoaHex(uint64_t num, char * str); 
+char * itoaHex(uint64_t num, char * str);
+
+void strncpy(char *dest, const char *src, size_t size);
 
 
 

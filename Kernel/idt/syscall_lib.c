@@ -203,3 +203,7 @@ uint64_t sys_free(uint64_t ptr) {
     my_free((void *) ptr);
     return 1;
 }
+
+uint64_t sys_ps() {
+    return (uint64_t) ps();
+}

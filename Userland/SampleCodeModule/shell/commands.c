@@ -24,7 +24,9 @@ static char * commands[][2] = {
         {"eliminator", "Starts the Eliminator game."},
         {"exception", "To test exceptions. Usage: exception [zero, invalidOpcode]"},
         {"ts", "Tests the scheduler."},
-        {"tp", "Tests priority."}
+        {"tp", "Tests priority."},
+        {"ps", "Shows the process list."},
+        {"kill", "Kills a process. Usage: kill [pid]"}
 };
 
 #define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))
@@ -42,6 +44,9 @@ static void printError(char * command, char * message, char * usage);
 static int exceptionCommand(int argc, char * argv[]);
 static int testSchedulerCommand(int argc, char * argv[]);
 static int testPriorityCommand(int argc, char * argv[]);
+static int psCommand(int argc, char * argv[]);
+static int killCommand(int argc, char * argv[]);
+static void printPsHeader();
 
 // Default scale
 static int scale = 1;
@@ -56,7 +61,9 @@ static int (*commandFunctions[])(int argc, char * argv[]) = {
     eliminatorCommand,
     exceptionCommand,
     testSchedulerCommand,
-    testPriorityCommand
+    testPriorityCommand,
+    psCommand,
+    killCommand
 };
 
 static const char * regNames[REGS_AMOUNT] = {
@@ -233,6 +240,48 @@ static int testPriorityCommand(int argc, char *argv[]) {
     int pid = _sys_createProcess((mainFunction)&test_prio, args, "test_priority", 1, 0);
     if(pid == -1) {
         printError("test_priority", "Error creating process.", NULL);
+        return ERROR;
+    }
+    return OK;
+}
+
+static void printPsHeader() {
+    printStringColor("PID; NAME; PARENT; PRIORITY; UNKILLABLE; STATUS; STACK_BASE\n", COMMAND_SECONDARY_COLOR);
+}
+
+static int psCommand(int argc, char * argv[]) {
+    int oldScale = scale;
+    setFontScale(1);
+    processInfo_t * processList = _sys_ps();
+    char * statusString[] = {"READY", "BLOCKED", "RUNNING", "TERMINATED"};
+    processInfo_t * current = processList;
+    printPsHeader();
+    while(current->pid != -1) {
+        printf("%d; %s; %d; %d; %d; %s; %x\n",
+               current->pid,
+               current->name,
+               current->parent,
+               current->priority,
+               current->unkillable,
+               statusString[current->status],
+               (uint64_t)current->stackBase);
+        current++;
+    }
+    if(oldScale != 1) {
+        setFontScale(oldScale);
+    }
+    return OK;
+}
+
+static int killCommand(int argc, char * argv[]) {
+    if(argc != 1) {
+        printError("kill", "Invalid amount of arguments.", "kill [pid]");
+        return ERROR;
+    }
+    int pid = atoi(argv[0]);
+    int ret = _sys_kill(pid);
+    if(ret == -1) {
+        printError("kill", "Error killing process.", NULL);
         return ERROR;
     }
     return OK;
