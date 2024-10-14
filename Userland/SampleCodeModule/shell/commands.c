@@ -292,7 +292,7 @@ static int killCommand(int argc, char * argv[]) {
 
 static int testMemoryManagerCommand(int argc, char * argv[]) {
     if(argc != 1) {
-        printError("test_memory_manager", "Invalid amount of arguments.", "tmm [processes]");
+        printError("test_memory_manager", "Invalid amount of arguments.", "tmm [mem_amount]");
         return ERROR;
     }
     // const because of naive mm
