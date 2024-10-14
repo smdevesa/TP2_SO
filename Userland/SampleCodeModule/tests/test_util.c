@@ -3,6 +3,7 @@
 //
 
 #include "../include/test_util.h"
+#include "../include/test_syscall.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -69,13 +70,14 @@ void endless_loop() {
         ;
 }
 
-/*
-void endless_loop_print(uint64_t wait) {
+int endless_loop_print(int argc, char *argv[]) {
+    if(argc != 1) return -1;
+    uint64_t wait = satoi(argv[0]);
     int64_t pid = my_getpid();
 
     while (1) {
         printf("%d ", pid);
         bussy_wait(wait);
     }
+    return 0;
 }
-*/
