@@ -79,5 +79,12 @@ char * itoaHex(uint64_t num, char * str) {
     return str;
 }
 
+void strncpy(char *dest, const char *src, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        dest[i] = src[i];
+        if (src[i] == 0) break;
+    }
+}
+
 
 

@@ -1,10 +1,12 @@
 #include <scheduler.h>
 #include <process.h>
 #include <memoryPositions.h>
+#include <memory_manager.h>
 #include <stddef.h>
 #include <syscall_lib.h>
 #include <lib.h>
 #include <interrupts.h>
+#include <lib.h>
 
 extern void _hlt();
 extern void _forceNextProcess();
@@ -17,16 +19,20 @@ typedef struct schedulerCDT {
     uint8_t processCount;
 } schedulerCDT;
 
+// avoid malloc
+static processInfo_t psInfo[MAX_PROCESSES + 1];
+
 static schedulerADT scheduler = NULL;
 
 static int initProcessMain(int argc, char **argv);
 static process_t * getNextProcess();
+static void killChildren(int16_t pid);
 
 static int initProcessMain(int argc, char **argv) {
     sys_write(1, "Initializing scheduler\n", 23, 0x00FFFFFF);
     char ** args = {NULL};
     addProcess((mainFunction)SHELL_ADDRESS, args, "shell",
-               2, 1);
+               2, 0);
 
     while(1) {
         for(int i=0; i<MAX_PROCESSES; i++) {
@@ -140,6 +146,7 @@ int32_t killProcess(uint16_t pid, int32_t retValue) {
     if(scheduler->processes[pid] == NULL) return -1;
     if(scheduler->processes[pid]->unkillable) return -1;
 
+    killChildren(pid);
     uint8_t contextSwitch = scheduler->processes[pid]->status == RUNNING;
     freeProcessStructure(scheduler->processes[pid]);
     scheduler->processes[pid] = NULL;
@@ -191,10 +198,39 @@ int32_t killCurrentProcess(int32_t retValue) {
     return killProcess(scheduler->current, retValue);
 }
 
+static void killChildren(int16_t pid) {
+    for(int i = 0; i < MAX_PROCESSES; i++) {
+        if(scheduler->processes[i] != NULL && scheduler->processes[i]->parentPid == pid) {
+            killProcess(scheduler->processes[i]->pid, 0);
+        }
+    }
+}
+
 void yield() {
     _forceNextProcess();
 }
 
 uint16_t getPid() {
     return scheduler->current;
+}
+
+processInfo_t * ps() {
+    int count = 0;
+    for(int i=0; i<MAX_PROCESSES; i++) {
+        if(scheduler->processes[i] != NULL) {
+            processInfo_t info;
+            info.pid = scheduler->processes[i]->pid;
+            strncpy(info.name, scheduler->processes[i]->name, MAX_NAME_LENGTH);
+            info.priority = scheduler->processes[i]->priority;
+            info.unkillable = scheduler->processes[i]->unkillable;
+            info.stackBase = scheduler->processes[i]->stackBase;
+            info.parent = scheduler->processes[i]->parentPid;
+            info.status = scheduler->processes[i]->status;
+            psInfo[count++] = info;
+        }
+    }
+    processInfo_t empty;
+    empty.pid = -1;
+    psInfo[count] = empty;
+    return psInfo;
 }

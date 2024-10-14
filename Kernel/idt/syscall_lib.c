@@ -7,6 +7,7 @@
 #include <time.h>
 #include <interrupts.h>
 #include <scheduler.h>
+#include <memory_manager.h>
 
 #define STDIN 0
 #define STDOUT 1
@@ -192,4 +193,17 @@ int64_t sys_killProcess(uint16_t pid) {
 
 int64_t sys_exit(int64_t retValue) {
     return killCurrentProcess(retValue);
+}
+
+uint64_t sys_malloc(uint64_t size) {
+    return (uint64_t) my_malloc(size);
+}
+
+uint64_t sys_free(uint64_t ptr) {
+    my_free((void *) ptr);
+    return 1;
+}
+
+uint64_t sys_ps() {
+    return (uint64_t) ps();
 }

@@ -19,6 +19,9 @@ GLOBAL _sys_block
 GLOBAL _sys_unblock
 GLOBAL _sys_changePriority
 GLOBAL _sys_exit
+GLOBAL _sys_malloc
+GLOBAL _sys_free
+GLOBAL _sys_ps
 
 section .text
 
@@ -48,3 +51,6 @@ _sys_block: syscall 0x10
 _sys_unblock: syscall 0x11
 _sys_changePriority: syscall 0x12
 _sys_exit: syscall 0x13
+_sys_malloc: syscall 0x14
+_sys_free: syscall 0x15
+_sys_ps: syscall 0x16

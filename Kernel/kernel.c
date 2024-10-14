@@ -1,11 +1,9 @@
 #include <stdint.h>
-#include <string.h>
 #include <lib.h>
 #include <moduleLoader.h>
 #include <idtLoader.h>
 #include <memory_manager.h>
 #include <scheduler.h>
-#include <syscall_lib.h>
 
 extern uint8_t text;
 extern uint8_t rodata;

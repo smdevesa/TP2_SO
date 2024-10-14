@@ -8,7 +8,7 @@
 typedef int (*mainFunction)(int argc, char **argv);
 
 typedef enum status {
-    READY,
+    READY = 0,
     BLOCKED,
     RUNNING,
     TERMINATED

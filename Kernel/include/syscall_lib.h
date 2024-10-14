@@ -175,4 +175,21 @@ int64_t sys_killProcess(uint16_t pid);
  */
 int64_t sys_exit(int64_t retValue);
 
+/**
+ * @brief Allocates memory.
+ * @param size: the size of the memory to allocate.
+ * @return the address of the allocated memory.
+ */
+uint64_t sys_malloc(uint64_t size);
+
+/**
+ * @brief Frees memory.
+ * @param ptr: the address of the memory to free.
+ */
+uint64_t sys_free(uint64_t ptr);
+
+/**
+ * @brief Returns the process list terminated with a process with pid == -1.
+ */
+uint64_t sys_ps();
 #endif
