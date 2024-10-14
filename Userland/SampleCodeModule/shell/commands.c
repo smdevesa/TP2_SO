@@ -23,6 +23,7 @@ static char * commands[][2] = {
         {"inforeg", "Shows the registers values."},
         {"eliminator", "Starts the Eliminator game."},
         {"exception", "To test exceptions. Usage: exception [zero, invalidOpcode]"},
+        {"tmm", "Tests memory manager."},
         {"ts", "Tests the scheduler."},
         {"tp", "Tests priority."},
         {"ps", "Shows the process list."},
@@ -46,6 +47,7 @@ static int testSchedulerCommand(int argc, char * argv[]);
 static int testPriorityCommand(int argc, char * argv[]);
 static int psCommand(int argc, char * argv[]);
 static int killCommand(int argc, char * argv[]);
+static int testMemoryManagerCommand(int argc, char * argv[]);
 static void printPsHeader();
 
 // Default scale
@@ -60,6 +62,7 @@ static int (*commandFunctions[])(int argc, char * argv[]) = {
     inforegCommand,
     eliminatorCommand,
     exceptionCommand,
+    testMemoryManagerCommand,
     testSchedulerCommand,
     testPriorityCommand,
     psCommand,
@@ -282,6 +285,21 @@ static int killCommand(int argc, char * argv[]) {
     int ret = _sys_kill(pid);
     if(ret == -1) {
         printError("kill", "Error killing process.", NULL);
+        return ERROR;
+    }
+    return OK;
+}
+
+static int testMemoryManagerCommand(int argc, char * argv[]) {
+    if(argc != 1) {
+        printError("test_memory_manager", "Invalid amount of arguments.", "tmm [processes]");
+        return ERROR;
+    }
+    // const because of naive mm
+    char * args[] = {"524288", NULL};
+    int pid = _sys_createProcess((mainFunction)&test_mm, args, "test_memory_manager", 1, 0);
+    if(pid == -1) {
+        printError("test_memory_manager", "Error creating process.", NULL);
         return ERROR;
     }
     return OK;

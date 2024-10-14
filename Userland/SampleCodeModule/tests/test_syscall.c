@@ -49,3 +49,11 @@ int64_t my_yield() {
 int64_t my_wait(int64_t pid) {
     return 0;
 }
+
+void * my_malloc(uint64_t size) {
+    return (void *)_sys_malloc(size);
+}
+
+void my_free(void * ptr) {
+    _sys_free(ptr);
+}

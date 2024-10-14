@@ -11,6 +11,7 @@ void bussy_wait(uint64_t n);
 void endless_loop();
 int endless_loop_print(int argc, char *argv[]);
 int64_t test_processes(int argc, char *argv[]);
+uint64_t test_mm(uint64_t argc, char *argv[]);
 void test_prio();
 
 #endif
