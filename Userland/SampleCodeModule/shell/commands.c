@@ -23,7 +23,8 @@ static char * commands[][2] = {
         {"inforeg", "Shows the registers values."},
         {"eliminator", "Starts the Eliminator game."},
         {"exception", "To test exceptions. Usage: exception [zero, invalidOpcode]"},
-        {"ts", "Tests the scheduler"}
+        {"ts", "Tests the scheduler."},
+        {"tp", "Tests priority."}
 };
 
 #define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))
@@ -40,6 +41,7 @@ static int fillCommandAndArgs(char ** command, char * args[], char * input);
 static void printError(char * command, char * message, char * usage);
 static int exceptionCommand(int argc, char * argv[]);
 static int testSchedulerCommand(int argc, char * argv[]);
+static int testPriorityCommand(int argc, char * argv[]);
 
 // Default scale
 static int scale = 1;
@@ -53,7 +55,8 @@ static int (*commandFunctions[])(int argc, char * argv[]) = {
     inforegCommand,
     eliminatorCommand,
     exceptionCommand,
-    testSchedulerCommand
+    testSchedulerCommand,
+    testPriorityCommand
 };
 
 static const char * regNames[REGS_AMOUNT] = {
@@ -220,6 +223,16 @@ static int testSchedulerCommand(int argc, char *argv[]) {
     int pid = _sys_createProcess((mainFunction)&test_processes, args, "test_processes", 1, 0);
     if(pid == -1) {
         printError("test_scheduler", "Error creating process.", NULL);
+        return ERROR;
+    }
+    return OK;
+}
+
+static int testPriorityCommand(int argc, char *argv[]) {
+    char * args[] = {NULL};
+    int pid = _sys_createProcess((mainFunction)&test_prio, args, "test_priority", 1, 0);
+    if(pid == -1) {
+        printError("test_priority", "Error creating process.", NULL);
         return ERROR;
     }
     return OK;
