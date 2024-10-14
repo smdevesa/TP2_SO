@@ -187,4 +187,17 @@ int64_t _sys_changePriority(uint64_t pid, uint64_t newPriority);
  */
 int64_t _sys_exit(int64_t retValue);
 
+/**
+ * @brief Asks the memory manager for a block of memory.
+ * @param size: the size of the block.
+ * @return the address of the block or NULL if there was an error.
+ */
+void *_sys_malloc(uint64_t size);
+
+/**
+ * @brief Frees a block of memory.
+ * @param ptr: the address of the block.
+ */
+void _sys_free(void *ptr);
+
 #endif
