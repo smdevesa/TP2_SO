@@ -36,11 +36,9 @@ void shell() {
     int returned = OK;
 
     if(username == NULL) {
-        // Default username
         setUsername("user");
     }
 
-    // Main loop
     while(returned != EXIT) {
         if(noScreenSpace()) {
             parseCommand("clear");

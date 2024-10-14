@@ -1,26 +1,48 @@
-//
-// Created by Santiago Devesa on 02/10/2024.
-//
-
 #include <scheduler.h>
 #include <process.h>
 #include <memoryPositions.h>
 #include <stddef.h>
+#include <syscall_lib.h>
+#include <lib.h>
+#include <interrupts.h>
+
+extern void _hlt();
+extern void _forceNextProcess();
 
 #define NO_PID -1
 
 typedef struct schedulerCDT {
     process_t *processes[MAX_PROCESSES];
-    process_t *processesPriority[MAX_PROCESSES * MAX_PRIORITY];
-    int16_t currentPid;
-    uint8_t nextUnusedPid;
+    int16_t current;
     uint8_t processCount;
-    uint8_t totalPriorityCount;
 } schedulerCDT;
 
 static schedulerADT scheduler = NULL;
 
-static int16_t getNextProcessPID();
+static int initProcessMain(int argc, char **argv);
+static process_t * getNextProcess();
+
+static int initProcessMain(int argc, char **argv) {
+    sys_write(1, "Initializing scheduler\n", 23, 0x00FFFFFF);
+    char ** args = {NULL};
+    addProcess((mainFunction)SHELL_ADDRESS, args, "shell",
+               2, 1);
+
+    while(1) {
+        for(int i=0; i<MAX_PROCESSES; i++) {
+            if(scheduler->processes[i] != NULL) {
+                if(scheduler->processes[i]->status == TERMINATED) {
+                    freeProcessStructure(scheduler->processes[i]);
+                    scheduler->processes[i] = NULL;
+                    scheduler->processCount--;
+                }
+            }
+        }
+        yield();
+    }
+
+    return 0;
+}
 
 schedulerADT createScheduler() {
     if(scheduler != NULL) return scheduler;
@@ -28,9 +50,11 @@ schedulerADT createScheduler() {
     for(int i = 0; i < MAX_PROCESSES; i++) {
         scheduler->processes[i] = NULL;
     }
-    scheduler->nextUnusedPid = 0;
     scheduler->processCount = 0;
-    scheduler->currentPid = NO_PID;
+    scheduler->current = NO_PID;
+
+    char *argv[] = {NULL};
+    addProcess((mainFunction)&initProcessMain, argv, "init", MIN_PRIORITY, 1);
     return scheduler;
 }
 
@@ -38,50 +62,68 @@ schedulerADT getScheduler() {
     return scheduler;
 }
 
-static int16_t getNextProcessPID() {
-    if(scheduler->processCount == 0) return NO_PID;
-    int16_t nextPid = scheduler->currentPid;
-    for (int i = 0; i < MAX_PROCESSES; i++) {
-        nextPid = (nextPid + 1) % MAX_PROCESSES;
-        if (scheduler->processes[nextPid] != NULL && scheduler->processes[nextPid]->status == READY) {
-            return nextPid;
-        }
+
+static process_t * getNextProcess() {
+    if (scheduler->processCount == 0) return NULL;
+
+    process_t *currentProcess = scheduler->processes[scheduler->current];
+    if (currentProcess != NULL && currentProcess->remainingQuantum > 0) {
+        currentProcess->remainingQuantum--;
+        return currentProcess;
     }
-    return NO_PID;
+
+    uint16_t start = (scheduler->current == NO_PID) ? 0 : (scheduler->current + 1) % MAX_PROCESSES;
+    uint16_t current = start;
+
+    do {
+        if (scheduler->processes[current] != NULL &&
+        scheduler->processes[current]->status == READY) {
+            scheduler->current = current;
+            scheduler->processes[current]->remainingQuantum = scheduler->processes[current]->priority - 1;
+            return scheduler->processes[current];
+        }
+        current = (current + 1) % MAX_PROCESSES;
+    } while (current != start);
+
+    return scheduler->processes[0];
 }
 
 void * schedule(void *prevRSP) {
-    if(scheduler == NULL || scheduler->processCount == 0) return prevRSP;
-    if(scheduler->processes[scheduler->currentPid] != NULL && scheduler->processes[scheduler->currentPid]->status == RUNNING) {
-        scheduler->processes[scheduler->currentPid]->stackPos = prevRSP;
-        scheduler->processes[scheduler->currentPid]->status = READY;
+    if(scheduler == NULL) return prevRSP;
+    if(scheduler->processCount == 0) return prevRSP;
+    if (scheduler->current != NO_PID) {
+        process_t *currentProcess = scheduler->processes[scheduler->current];
+        currentProcess->status = READY;
+        currentProcess->stackPos = prevRSP;
     }
-    int16_t nextPid = getNextProcessPID();
-    if(nextPid == NO_PID) return prevRSP;
-    scheduler->currentPid = nextPid;
-    scheduler->processes[nextPid]->status = RUNNING;
-    return scheduler->processes[nextPid]->stackPos;
+
+    process_t *nextProcess = getNextProcess();
+    scheduler->current = nextProcess->pid;
+    uint64_t nextRSP = (uint64_t)nextProcess->stackPos;
+    nextProcess->status = RUNNING;
+
+    return (void *)nextRSP;
 }
 
-int64_t addProcess(mainFunction main, char **argv, char *name,uint8_t priority, uint8_t unkillable) {
-    if(scheduler == NULL || scheduler->processCount >= MAX_PROCESSES) return NO_PID;
-    process_t *p = createProcessStructure(scheduler->nextUnusedPid, scheduler->currentPid != NO_PID ? scheduler->currentPid : 0, NO_PID, main, argv, name, priority ,unkillable);
 
-    if(p == NULL) return NO_PID;
 
-    scheduler->processes[scheduler->nextUnusedPid] = p;
+int64_t addProcess(mainFunction main, char **argv, char *name, uint8_t priority, uint8_t unkillable) {
+    if(scheduler == NULL) return NO_PID;
+    if(scheduler->processCount >= MAX_PROCESSES) return NO_PID;
+    if(priority < MIN_PRIORITY || priority > MAX_PRIORITY) return NO_PID;
 
-    for(int i = 0; i < priority; i++){
-        scheduler -> processesPriority[scheduler->totalPriorityCount + i] = p;
-    }
-    scheduler->totalPriorityCount += priority;
+    uint16_t newPid = scheduler->processCount;
+    uint16_t parentPid = (scheduler->current != NO_PID) ? scheduler->current : NO_PID;
+
+    process_t *newProcess = createProcessStructure(newPid, parentPid, NO_PID, main, argv, name, priority, unkillable);
+    if (newProcess == NULL) return NO_PID;
+
+    scheduler->processes[newPid] = newProcess;
     scheduler->processCount++;
 
-    while(scheduler->processes[scheduler->nextUnusedPid] != NULL) {
-        scheduler->nextUnusedPid = (scheduler->nextUnusedPid + 1) % MAX_PROCESSES;
-    }
-    return p->pid;
+    return newPid;
 }
+
 
 void freeScheduler() {
     for(int i = 0; i < MAX_PROCESSES; i++) {
@@ -92,14 +134,67 @@ void freeScheduler() {
     scheduler = NULL;
 }
 
-int16_t killProcess(uint16_t pid) {
-    if(scheduler == NULL || scheduler->processCount == 0) return -1;
-    if(pid < 0 || pid >= MAX_PROCESSES || scheduler->processes[pid] == NULL) return -1;
+int32_t killProcess(uint16_t pid, int32_t retValue) {
+    if(scheduler == NULL) return -1;
+    if(pid >= MAX_PROCESSES) return -1;
+    if(scheduler->processes[pid] == NULL) return -1;
     if(scheduler->processes[pid]->unkillable) return -1;
 
+    uint8_t contextSwitch = scheduler->processes[pid]->status == RUNNING;
     freeProcessStructure(scheduler->processes[pid]);
     scheduler->processes[pid] = NULL;
-    if(scheduler->processCount > 0) scheduler->processCount--;
-    scheduler->nextUnusedPid = pid;
+    scheduler->processCount--;
+    if(contextSwitch){
+        yield();
+    }
+
     return 0;
+}
+
+int blockProcess(uint16_t pid){
+    if(scheduler == NULL) return -1;
+    if(pid >= MAX_PROCESSES) return -1;
+    if(scheduler->processes[pid] == NULL) return -1;
+    if (scheduler->processes[pid]->status == TERMINATED) return -1;
+
+    uint8_t contextSwitch = scheduler->processes[pid]->status == RUNNING;
+    scheduler->processes[pid]->status = BLOCKED;
+
+    if(contextSwitch){
+        yield();
+    }
+    return 0;
+}
+
+int unblockProcess(uint16_t pid){
+    if(scheduler == NULL) return -1;
+    if(pid >= MAX_PROCESSES) return -1;
+    if(scheduler->processes[pid] == NULL) return -1;
+    if (scheduler->processes[pid]->status != BLOCKED) return -1;
+    scheduler->processes[pid]->status = READY;
+    return 0;
+}
+
+int changePriority(uint16_t pid, uint8_t newPriority){
+    if(scheduler == NULL) return -1;
+    if(pid >= MAX_PROCESSES) return -1;
+    if(scheduler->processes[pid] == NULL) return -1;
+    if(newPriority < MIN_PRIORITY || newPriority > MAX_PRIORITY) return -1;
+
+    scheduler->processes[pid]->priority = newPriority;
+    scheduler->processes[pid]->remainingQuantum = newPriority;
+    return 0;
+}
+
+
+int32_t killCurrentProcess(int32_t retValue) {
+    return killProcess(scheduler->current, retValue);
+}
+
+void yield() {
+    _forceNextProcess();
+}
+
+uint16_t getPid() {
+    return scheduler->current;
 }

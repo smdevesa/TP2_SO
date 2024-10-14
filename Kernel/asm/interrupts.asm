@@ -17,12 +17,14 @@ GLOBAL _exception6Handler
 GLOBAL _exception0Handler
 
 GLOBAL _initialize_stack_frame
+GLOBAL _forceNextProcess
 GLOBAL _getSnapshot
 
 EXTERN irqDispatcher
 EXTERN syscallDispatcher
 EXTERN exceptionDispatcher
 EXTERN getStackBase
+EXTERN schedule
 
 section .rodata
     userland equ 0x400000
@@ -129,6 +131,23 @@ SECTION .text
 	iretq
 %endmacro
 
+_initialize_stack_frame:
+	mov r8, rsp
+	mov r9, rbp
+	mov rsp, rdx
+	mov rbp, rdx
+	push 0x0
+	push rdx
+	push 0x202
+	push 0x8
+	push rdi
+	mov rdi, rsi
+	mov rsi, rcx
+	pushState 1
+	mov rax, rsp
+	mov rsp, r8
+	mov rbp, r9
+	ret
 
 
 
@@ -136,6 +155,9 @@ _getSnapshot:
    mov rax, regs
    ret
 
+_forceNextProcess:
+    int 20h
+    ret
 
 
 _hlt:
@@ -200,25 +222,6 @@ _irq80Handler:
     call syscallDispatcher
     popState 0
     iretq
-
-; extern void _initialize_stack_frame();
-_initialize_stack_frame:
-	mov r8, rsp
-	mov r9, rbp
-	mov rsp, rdx
-	mov rbp, rdx
-	push 0x0
-	push rdx
-	push 0x202
-	push 0x8
-	push rdi
-	mov rdi, rsi
-	mov rsi, rcx
-	pushState 1
-	mov rax, rsp
-	mov rsp, r8
-	mov rbp, r9
-	ret
 
 ;Zero Division Exception
 _exception0Handler:

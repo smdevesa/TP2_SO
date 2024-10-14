@@ -6,6 +6,7 @@
 #include <rtc.h>
 #include <time.h>
 #include <interrupts.h>
+#include <scheduler.h>
 
 #define STDIN 0
 #define STDOUT 1
@@ -158,4 +159,37 @@ uint64_t sys_setBgColor(uint32_t color) {
 
 uint64_t sys_getBgColor() {
     return bgColor;
+}
+
+uint64_t sys_yield() {
+    yield();
+    return 1;
+}
+
+uint64_t sys_getPid() {
+    return getPid();
+}
+
+int64_t sys_createProcess(uint64_t main, char **argv, char *name, uint8_t priority, uint8_t unkillable) {
+    return addProcess((mainFunction)main, argv, name, priority, unkillable);
+}
+
+int64_t sys_blockProcess(uint16_t pid) {
+    return blockProcess(pid);
+}
+
+int64_t sys_unblockProcess(uint16_t pid) {
+    return unblockProcess(pid);
+}
+
+int64_t sys_changePriority(uint16_t pid, uint8_t newPriority) {
+    return changePriority(pid, newPriority);
+}
+
+int64_t sys_killProcess(uint16_t pid) {
+    return killProcess(pid, 0);
+}
+
+int64_t sys_exit(int64_t retValue) {
+    return killCurrentProcess(retValue);
 }

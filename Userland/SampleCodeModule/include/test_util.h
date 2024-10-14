@@ -1,9 +1,5 @@
-//
-// Created by Santiago Devesa on 21/09/2024.
-//
-
-#ifndef UNTITLED_TEST_UTIL_H
-#define UNTITLED_TEST_UTIL_H
+#ifndef _TEST_UTIL_H
+#define _TEST_UTIL_H
 
 #include <stdint.h>
 
@@ -14,5 +10,6 @@ int64_t satoi(char *str);
 void bussy_wait(uint64_t n);
 void endless_loop();
 void endless_loop_print(uint64_t wait);
+int64_t test_processes(int argc, char *argv[]);
 
-#endif //UNTITLED_TEST_UTIL_H
+#endif

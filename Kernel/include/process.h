@@ -1,11 +1,9 @@
-//
-// Created by Santiago Devesa on 02/10/2024.
-//
-
 #ifndef TP2_SO_PROCESS_H
 #define TP2_SO_PROCESS_H
 
 #include <stdint.h>
+
+#define MAX_NAME_LENGTH 256
 
 typedef int (*mainFunction)(int argc, char **argv);
 
@@ -13,11 +11,10 @@ typedef enum status {
     READY,
     BLOCKED,
     RUNNING,
-    ZOMBIE,
-    DEAD
+    TERMINATED
 } processStatus_t;
 
-typedef struct Process {
+typedef struct process {
     uint16_t pid;
     uint16_t parentPid;
     uint16_t waitingForPid;
@@ -25,9 +22,10 @@ typedef struct Process {
     void *stackPos;
     mainFunction main;
     char **argv;
-    char *name;
+    char name[MAX_NAME_LENGTH];
     processStatus_t status;
     uint8_t priority;
+    uint8_t remainingQuantum;
     uint8_t unkillable;
     int32_t retValue;
 } process_t;

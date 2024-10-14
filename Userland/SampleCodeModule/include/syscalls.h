@@ -44,6 +44,8 @@ enum registers_idx {
     RSP_IDX
 };
 
+typedef int (*mainFunction)(int argc, char **argv);
+
 /**
  * @brief Reads a string from the file descriptor.
  * @param fd file descriptor
@@ -128,5 +130,61 @@ uint64_t _sys_sleep(uint64_t millis);
  * @param millis: the amount of milliseconds to last.
  */
 uint64_t _sys_playSound(uint64_t f, uint64_t millis);
+
+/**
+ * @brief Returns the current process id.
+ */
+uint64_t _sys_getpid();
+
+/**
+ * @brief Gives the CPU to the next process.
+ */
+uint64_t _sys_yield();
+
+/**
+ * @brief Creates a new process.
+ * @param main: the main function of the process.
+ * @param argv: the arguments of the process.
+ * @param name: the name of the process.
+ * @param priority: the priority of the process.
+ * @param unkillable: 1 if the process is unkillable, 0 otherwise.
+ * @return the PID of the new process.
+ */
+int64_t _sys_createProcess(mainFunction main, char **argv, char *name, uint8_t priority, uint8_t unkillable);
+
+/**
+ * @brief Kills a process.
+ * @param pid the process id.
+ * @return 0 if the process was killed successfully, -1 otherwise.
+ */
+int64_t _sys_kill(uint64_t pid);
+
+/**
+ * @brief Blocks a process.
+ * @param pid the process id.
+ * @return 0 if the process was blocked successfully, -1 otherwise.
+ */
+int64_t _sys_block(uint64_t pid);
+
+/**
+ * @brief Unblocks a process.
+ * @param pid the process id.
+ * @return 0 if the process was unblocked successfully, -1 otherwise.
+ */
+int64_t _sys_unblock(uint64_t pid);
+
+/**
+ * @brief Changes the priority of a process.
+ * @param pid the process id.
+ * @param newPriority the new priority.
+ * @return 0 if the priority was changed successfully, -1 otherwise.
+ */
+int64_t _sys_changePriority(uint64_t pid, uint64_t newPriority);
+
+/**
+ * @brief Ends the execution of the caller process.
+ * @param retValue
+ */
+int64_t _sys_exit(int64_t retValue);
 
 #endif

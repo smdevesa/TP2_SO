@@ -4,8 +4,8 @@
 #include <moduleLoader.h>
 #include <idtLoader.h>
 #include <memory_manager.h>
-#include <test_util.h>
-
+#include <scheduler.h>
+#include <syscall_lib.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -49,8 +49,8 @@ void * initializeKernelBinary()
 
 int main()
 {
+    my_mem_init(START_FREE_MEM, MEM_SIZE);
+    createScheduler();
     load_idt();
-    void *mem = START_FREE_MEM;
-    my_mem_init(mem, MEM_SIZE);
-    return ((EntryPoint)sampleCodeModuleAddress)();
+    return 0;
 }

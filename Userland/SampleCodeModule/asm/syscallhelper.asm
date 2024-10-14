@@ -11,7 +11,14 @@ GLOBAL _sys_setFontScale
 GLOBAL _sys_getRegisters
 GLOBAL _sys_sleep
 GLOBAL _sys_playSound
-
+GLOBAL _sys_yield
+GLOBAL _sys_getpid
+GLOBAL _sys_createProcess
+GLOBAL _sys_kill
+GLOBAL _sys_block
+GLOBAL _sys_unblock
+GLOBAL _sys_changePriority
+GLOBAL _sys_exit
 
 section .text
 
@@ -33,3 +40,11 @@ _sys_setFontScale: syscall 0x08
 _sys_getRegisters: syscall 0x09
 _sys_sleep: syscall 0x0A
 _sys_playSound: syscall 0x0B
+_sys_yield: syscall 0x0C
+_sys_getpid: syscall 0x0D
+_sys_createProcess: syscall 0x0E
+_sys_kill: syscall 0x0F
+_sys_block: syscall 0x10
+_sys_unblock: syscall 0x11
+_sys_changePriority: syscall 0x12
+_sys_exit: syscall 0x13
