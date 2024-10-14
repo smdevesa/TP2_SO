@@ -1,11 +1,8 @@
 #include <scheduler.h>
 #include <process.h>
 #include <memoryPositions.h>
-#include <memory_manager.h>
 #include <stddef.h>
 #include <syscall_lib.h>
-#include <lib.h>
-#include <interrupts.h>
 #include <lib.h>
 
 extern void _hlt();
@@ -26,13 +23,13 @@ static schedulerADT scheduler = NULL;
 
 static int initProcessMain(int argc, char **argv);
 static process_t * getNextProcess();
-static void killChildren(int16_t pid);
+static void adoptChildren(int16_t pid);
 
 static int initProcessMain(int argc, char **argv) {
     sys_write(1, "Initializing scheduler\n", 23, 0x00FFFFFF);
     char ** args = {NULL};
     addProcess((mainFunction)SHELL_ADDRESS, args, "shell",
-               2, 0);
+               4, 0);
 
     while(1) {
         for(int i=0; i<MAX_PROCESSES; i++) {
@@ -146,7 +143,7 @@ int32_t killProcess(uint16_t pid, int32_t retValue) {
     if(scheduler->processes[pid] == NULL) return -1;
     if(scheduler->processes[pid]->unkillable) return -1;
 
-    killChildren(pid);
+    adoptChildren(pid);
     uint8_t contextSwitch = scheduler->processes[pid]->status == RUNNING;
     freeProcessStructure(scheduler->processes[pid]);
     scheduler->processes[pid] = NULL;
@@ -198,10 +195,10 @@ int32_t killCurrentProcess(int32_t retValue) {
     return killProcess(scheduler->current, retValue);
 }
 
-static void killChildren(int16_t pid) {
+static void adoptChildren(int16_t pid) {
     for(int i = 0; i < MAX_PROCESSES; i++) {
         if(scheduler->processes[i] != NULL && scheduler->processes[i]->parentPid == pid) {
-            killProcess(scheduler->processes[i]->pid, 0);
+            scheduler->processes[i]->parentPid = 0; // 0 is the init process
         }
     }
 }
