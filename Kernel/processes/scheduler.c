@@ -115,7 +115,10 @@ int64_t addProcess(mainFunction main, char **argv, char *name, uint8_t priority,
     if(scheduler->processCount >= MAX_PROCESSES) return NO_PID;
     if(priority < MIN_PRIORITY || priority > MAX_PRIORITY) return NO_PID;
 
-    uint16_t newPid = scheduler->processCount;
+    uint16_t newPid;
+    for(newPid = 0; newPid < MAX_PROCESSES; newPid++) {
+        if(scheduler->processes[newPid] == NULL) break;
+    }
     uint16_t parentPid = (scheduler->current != NO_PID) ? scheduler->current : NO_PID;
 
     process_t *newProcess = createProcessStructure(newPid, parentPid, NO_PID, main, argv, name, priority, unkillable);
