@@ -5,4 +5,10 @@
 #ifndef TP2_SO_SEMAPHORE_H
 #define TP2_SO_SEMAPHORE_H
 
+#define MAX_SEMAPHORES 64
+
+#include <stdint.h>
+
+void initSemManager();
+
 #endif //TP2_SO_SEMAPHORE_H
