@@ -23,7 +23,6 @@ static schedulerADT scheduler = NULL;
 static int initProcessMain(int argc, char **argv);
 static process_t * getNextProcess();
 static void adoptChildren(int16_t pid);
-static void unblockWaitingProcess(uint16_t pid);
 static void removeProcess(uint16_t pid);
 
 static int initProcessMain(int argc, char **argv) {
@@ -62,13 +61,6 @@ schedulerADT getScheduler() {
     return scheduler;
 }
 
-static void unblockWaitingProcess(uint16_t pid) {
-    for (int i = 0; i < MAX_PROCESSES; i++) {
-        if (scheduler->processes[i] != NULL && scheduler->processes[i]->waitingForPid == pid) {
-            unblockProcess(i);
-        }
-    }
-}
 
 static void removeProcess(uint16_t pid) {
     if (scheduler->processes[pid] != NULL) {
@@ -257,8 +249,10 @@ int64_t waitPid(uint32_t pid) {
     if(scheduler->processes[pid] == NULL) return -1;
     if(scheduler->processes[pid]->parentPid != scheduler->current) return -1;
 
-    scheduler->processes[scheduler->current]->waitingForPid = pid;
-    blockProcess(scheduler->current);
+    if(scheduler->processes[pid]->status != TERMINATED) {
+        scheduler->processes[scheduler->current]->waitingForPid = pid;
+        blockProcess(scheduler->current);
+    }
 
     scheduler->processes[scheduler->current]->waitingForPid = NO_PID;
     int64_t retValue = scheduler->processes[pid]->retValue;
@@ -271,6 +265,9 @@ void exit(int64_t retValue) {
     process_t *currentProcess = scheduler->processes[scheduler->current];
     currentProcess->status = TERMINATED;
     currentProcess->retValue = retValue;
-    unblockWaitingProcess(scheduler->current);
+    process_t * parent = scheduler->processes[currentProcess->parentPid];
+    if(parent != NULL && parent->status == BLOCKED && parent->waitingForPid == currentProcess->pid) {
+        unblockProcess(parent->pid);
+    }
     yield();
 }

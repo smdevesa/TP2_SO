@@ -92,6 +92,7 @@ static semaphore_t * getSemByName(char * name) {
 void initSemManager() {
     if(semaphoreManager != NULL) return;
     semaphoreManager = (semaphore_manager_t *) SEMAPHORE_ADDRESS;
+    semaphoreManager->lock = 1;
     acquire(&semaphoreManager->lock);
     for (int i = 0; i < MAX_SEMAPHORES; i++) {
         semaphoreManager->semaphores[i] = NULL;
