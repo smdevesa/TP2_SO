@@ -2,7 +2,6 @@
 #include <process.h>
 #include <memoryPositions.h>
 #include <stddef.h>
-#include <syscall_lib.h>
 #include <lib.h>
 
 extern void _hlt();
@@ -24,9 +23,10 @@ static schedulerADT scheduler = NULL;
 static int initProcessMain(int argc, char **argv);
 static process_t * getNextProcess();
 static void adoptChildren(int16_t pid);
+static void unblockWaitingProcess(uint16_t pid);
+static void removeProcess(uint16_t pid);
 
 static int initProcessMain(int argc, char **argv) {
-    sys_write(1, "Initializing scheduler\n", 23, 0x00FFFFFF);
     char ** args = {NULL};
     addProcess((mainFunction)SHELL_ADDRESS, args, "shell",
                4, 0);
@@ -35,15 +35,13 @@ static int initProcessMain(int argc, char **argv) {
         for(int i=0; i<MAX_PROCESSES; i++) {
             if(scheduler->processes[i] != NULL) {
                 if(scheduler->processes[i]->status == TERMINATED && scheduler->processes[i]->parentPid == 0) {
-                    freeProcessStructure(scheduler->processes[i]);
-                    scheduler->processes[i] = NULL;
-                    scheduler->processCount--;
+                    removeProcess(i);
                 }
             }
         }
         yield();
     }
-
+    return 0;
 }
 
 schedulerADT createScheduler() {
@@ -64,12 +62,27 @@ schedulerADT getScheduler() {
     return scheduler;
 }
 
+static void unblockWaitingProcess(uint16_t pid) {
+    for (int i = 0; i < MAX_PROCESSES; i++) {
+        if (scheduler->processes[i] != NULL && scheduler->processes[i]->waitingForPid == pid) {
+            unblockProcess(i);
+        }
+    }
+}
+
+static void removeProcess(uint16_t pid) {
+    if (scheduler->processes[pid] != NULL) {
+        freeProcessStructure(scheduler->processes[pid]);
+        scheduler->processes[pid] = NULL;
+        scheduler->processCount--;
+    }
+}
 
 static process_t * getNextProcess() {
     if (scheduler->processCount == 0) return NULL;
 
     process_t *currentProcess = scheduler->processes[scheduler->current];
-    if (currentProcess != NULL && currentProcess->remainingQuantum > 0) {
+    if (currentProcess != NULL && currentProcess->status != TERMINATED && currentProcess->remainingQuantum > 0) {
         currentProcess->remainingQuantum--;
         return currentProcess;
     }
@@ -93,7 +106,9 @@ static process_t * getNextProcess() {
 void * schedule(void *prevRSP) {
     if(scheduler == NULL) return prevRSP;
     if(scheduler->processCount == 0) return prevRSP;
-    if (scheduler->current != NO_PID) {
+
+    if (scheduler->current != NO_PID &&
+        scheduler->processes[scheduler->current]->status != TERMINATED) {
         process_t *currentProcess = scheduler->processes[scheduler->current];
         currentProcess->status = READY;
         currentProcess->stackPos = prevRSP;
@@ -139,23 +154,17 @@ void freeScheduler() {
     scheduler = NULL;
 }
 
-int32_t killProcess(uint16_t pid, int32_t retValue) {
+int32_t killProcess(uint16_t pid) {
     if(scheduler == NULL) return -1;
     if(pid >= MAX_PROCESSES) return -1;
     if(scheduler->processes[pid] == NULL) return -1;
     if(scheduler->processes[pid]->unkillable) return -1;
 
     adoptChildren(pid);
-    uint8_t contextSwitch = scheduler->processes[pid]->status == RUNNING;
-    scheduler->processes[pid]->status = TERMINATED;
-    scheduler->processes[pid]->retValue = retValue;
+    unblockWaitingProcess(pid);
 
-    for (int i = 0; i < MAX_PROCESSES; i++) {
-        if (scheduler->processes[i] != NULL && scheduler->processes[i]->waitingForPid == pid) {
-            scheduler->processes[i]->waitingForPid = NO_PID;
-            unblockProcess(i);
-        }
-    }
+    uint8_t contextSwitch = scheduler->processes[pid]->status == RUNNING;
+    removeProcess(pid);
 
     if(contextSwitch){
         yield();
@@ -168,7 +177,7 @@ int blockProcess(uint16_t pid){
     if(scheduler == NULL) return -1;
     if(pid >= MAX_PROCESSES) return -1;
     if(scheduler->processes[pid] == NULL) return -1;
-    if (scheduler->processes[pid]->status == TERMINATED) return -1;
+    if(scheduler->processes[pid]->status == TERMINATED) return -1;
 
     uint8_t contextSwitch = scheduler->processes[pid]->status == RUNNING;
     scheduler->processes[pid]->status = BLOCKED;
@@ -183,7 +192,8 @@ int unblockProcess(uint16_t pid){
     if(scheduler == NULL) return -1;
     if(pid >= MAX_PROCESSES) return -1;
     if(scheduler->processes[pid] == NULL) return -1;
-    if (scheduler->processes[pid]->status != BLOCKED) return -1;
+    if(scheduler->processes[pid]->status != BLOCKED) return -1;
+
     scheduler->processes[pid]->status = READY;
     return 0;
 }
@@ -200,8 +210,8 @@ int changePriority(uint16_t pid, uint8_t newPriority){
 }
 
 
-int32_t killCurrentProcess(int32_t retValue) {
-    return killProcess(scheduler->current, retValue);
+int32_t killCurrentProcess() {
+    return killProcess(scheduler->current);
 }
 
 static void adoptChildren(int16_t pid) {
@@ -253,9 +263,14 @@ int64_t waitPid(uint32_t pid) {
     scheduler->processes[scheduler->current]->waitingForPid = NO_PID;
     int64_t retValue = scheduler->processes[pid]->retValue;
 
-    my_free(scheduler->processes[pid]);
-    scheduler->processes[pid] = NULL;
-    scheduler->processCount--;
-
+    removeProcess(pid);
     return retValue;
+}
+
+void exit(int64_t retValue) {
+    process_t *currentProcess = scheduler->processes[scheduler->current];
+    currentProcess->status = TERMINATED;
+    currentProcess->retValue = retValue;
+    unblockWaitingProcess(scheduler->current);
+    yield();
 }

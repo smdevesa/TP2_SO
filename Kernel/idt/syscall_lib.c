@@ -188,11 +188,12 @@ int64_t sys_changePriority(uint16_t pid, uint8_t newPriority) {
 }
 
 int64_t sys_killProcess(uint16_t pid) {
-    return killProcess(pid, 0);
+    return killProcess(pid);
 }
 
 int64_t sys_exit(int64_t retValue) {
-    return killCurrentProcess(retValue);
+    exit(retValue);
+    return 1;
 }
 
 uint64_t sys_malloc(uint64_t size) {
