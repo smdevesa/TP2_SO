@@ -9,6 +9,7 @@
 #include <memory_manager.h>
 #include <scheduler.h>
 #include <lib.h>
+#include <syscall_lib.h>
 
 typedef struct {
     uint32_t v[MAX_PROCESSES];
@@ -49,28 +50,18 @@ static int64_t getFreeId() {
 }
 
 static uint64_t popFromQueue(semaphore_t * sem) {
-    acquire(&sem->lock);
-    if(sem->queue.size == 0) {
-        release(&sem->lock);
-        return -1;
-    }
+    if(sem->queue.size == 0) return -1;
     uint32_t pid = sem->queue.v[sem->queue.readIndex];
     sem->queue.readIndex = (sem->queue.readIndex + 1) % MAX_PROCESSES;
     sem->queue.size--;
-    release(&sem->lock);
     return pid;
 }
 
 static int addToQueue(semaphore_t * sem, uint32_t pid) {
-    acquire(&sem->lock);
-    if(sem->queue.size >= MAX_PROCESSES) {
-        release(&sem->lock);
-        return -1;
-    }
+    if(sem->queue.size >= MAX_PROCESSES) return -1;
     sem->queue.v[sem->queue.writeIndex] = pid;
     sem->queue.writeIndex = (sem->queue.writeIndex + 1) % MAX_PROCESSES;
     sem->queue.size++;
-    release(&sem->lock);
     return 0;
 }
 
@@ -139,6 +130,7 @@ int64_t semOpen(char * name, int initialValue) {
 
 int64_t semClose(char * name) {
     if(semaphoreManager == NULL) return -1;
+    sys_write(1, "semClose: ", 9, 0x00FFFFFF);
     acquire(&semaphoreManager->lock);
     int idx = getIdxByName(name);
     if(idx == -1) {
@@ -149,12 +141,14 @@ int64_t semClose(char * name) {
     semaphore_t * sem = semaphoreManager->semaphores[idx];
     if(sem->using > 1) {
         acquire(&sem->lock);
+        sys_write(1, "decrementing using\n", 20, 0x00FFFFFF);
         sem->using--;
         release(&sem->lock);
         release(&semaphoreManager->lock);
         return 0;
     }
 
+    sys_write(1, "semClose freeing sem\n", 22, 0x00FFFFFF);
     my_free(sem);
     semaphoreManager->semaphores[idx] = NULL;
     semaphoreManager->semaphoresCount--;
@@ -163,6 +157,7 @@ int64_t semClose(char * name) {
 }
 
 int64_t semWait(char * name) {
+    sys_write(1, "semWait: ", 8, 0x00FFFFFF);
     if (semaphoreManager == NULL) return -1;
 
     acquire(&semaphoreManager->lock);
@@ -178,17 +173,22 @@ int64_t semWait(char * name) {
         return 0;
     }
     uint16_t pid = getPid();
-    if (addToQueue(sem, pid) != 0) {
+    if (addToQueue(sem, pid) == -1) {
         release(&sem->lock);
         return -1;
     }
-    blockProcess(pid);
     release(&sem->lock);
+    sys_write(1, "Blocking process: ", 18, 0x00FFFFFF);
+    char pidStr[1] = {(char)pid + '0'};
+    sys_write(1, pidStr, 1, 0x00FFFFFF);
+    sys_write(1, "\n", 1, 0);
+    blockProcess(pid);
     return 0;
 }
 
 
 int64_t semPost(char * name) {
+    sys_write(1, "semPost: ", 8, 0x00FFFFFF);
     if (semaphoreManager == NULL) return -1;
 
     acquire(&semaphoreManager->lock);
@@ -201,8 +201,13 @@ int64_t semPost(char * name) {
 
     if (sem->queue.size > 0) {
         uint32_t pid = popFromQueue(sem);
+        sys_write(1, "Unblocking process: ", 20, 0x00FFFFFF);
+        char pidstr[1] = {pid + '0'};
+        sys_write(1, pidstr, 1, 0x00FFFFFF);
+        sys_write(1, "\n", 1, 0);
         unblockProcess(pid);
     } else {
+        sys_write(1, "Increasing semaphore value\n", 27, 0x00FFFFFF);
         sem->value++;
     }
 

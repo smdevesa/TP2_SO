@@ -16,8 +16,8 @@ typedef enum status {
 
 typedef struct process {
     uint16_t pid;
-    uint16_t parentPid;
-    uint16_t waitingForPid;
+    int16_t parentPid;
+    int16_t waitingForPid;
     void *stackBase;
     void *stackPos;
     mainFunction main;

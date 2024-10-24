@@ -58,19 +58,22 @@ int atoi(const char *str) {
     return res;
 }
 
-char * itoa(int num, char * str) {
+char *itoa(int num, char *str) {
     int i = 0;
-    if (num == 0) {
+    if (num < 0) {
+        str[i++] = '-';
+        num = -num;
+    } else if (num == 0) {
         str[i++] = '0';
     }
-    else {
-        while (num != 0) {
-            str[i++] = num % 10 + '0';
-            num /= 10;
-        }
+
+    while (num != 0) {
+        str[i++] = num % 10 + '0';
+        num /= 10;
     }
-    str[i] = 0;
-    reverse(str);
+
+    str[i] = '\0';
+    reverse(str + (str[0] == '-' ? 1 : 0));
     return str;
 }
 

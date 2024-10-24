@@ -193,7 +193,7 @@ int64_t sys_killProcess(uint16_t pid) {
 }
 
 int64_t sys_exit(int64_t retValue) {
-    exit(retValue);
+    my_exit(retValue);
     return 1;
 }
 

@@ -37,7 +37,7 @@ int blockProcess(uint16_t pid);
 int unblockProcess(uint16_t pid);
 int changePriority(uint16_t pid, uint8_t newPriority);
 processInfo_t * ps();
-void exit(int64_t retValue);
+void my_exit(int64_t retValue);
 int64_t waitPid(uint32_t pid);
 
 #endif //TP2_SO_SCHEDULER_H
