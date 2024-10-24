@@ -219,7 +219,7 @@ int64_t sys_semClose(char * name){
 }
 
 int64_t sys_semWait(char * name){
-    return semWait(name)
+    return semWait(name);
 }
 
 

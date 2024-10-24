@@ -27,7 +27,8 @@ static char * commands[][2] = {
         {"ts", "Tests the scheduler."},
         {"tp", "Tests priority."},
         {"ps", "Shows the process list."},
-        {"kill", "Kills a process. Usage: kill [pid]"}
+        {"kill", "Kills a process. Usage: kill [pid]"},
+        {"tsy", "Tests the synchronization primitives. Usage: tsy [n] [use_sem]"}
 };
 
 #define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))
@@ -49,6 +50,7 @@ static int psCommand(int argc, char * argv[]);
 static int killCommand(int argc, char * argv[]);
 static int testMemoryManagerCommand(int argc, char * argv[]);
 static void printPsHeader();
+static int testSyncCommand(int argc, char * argv[]);
 
 // Default scale
 static int scale = 1;
@@ -66,7 +68,8 @@ static int (*commandFunctions[])(int argc, char * argv[]) = {
     testSchedulerCommand,
     testPriorityCommand,
     psCommand,
-    killCommand
+    killCommand,
+    testSyncCommand
 };
 
 static const char * regNames[REGS_AMOUNT] = {
@@ -300,6 +303,20 @@ static int testMemoryManagerCommand(int argc, char * argv[]) {
     int pid = _sys_createProcess((mainFunction)&test_mm, args, "test_memory_manager", 1, 0);
     if(pid == -1) {
         printError("test_memory_manager", "Error creating process.", NULL);
+        return ERROR;
+    }
+    return OK;
+}
+
+static int testSyncCommand(int argc, char * argv[]) {
+    if(argc != 2) {
+        printError("test_sync", "Invalid amount of arguments.", "tsy [n] [use_sem]");
+        return ERROR;
+    }
+    char * args[] = {argv[0], argv[1], NULL};
+    int pid = _sys_createProcess((mainFunction)&test_sync, args, "test_sync", 1, 0);
+    if(pid == -1) {
+        printError("test_sync", "Error creating process.", NULL);
         return ERROR;
     }
     return OK;

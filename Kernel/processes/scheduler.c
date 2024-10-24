@@ -153,8 +153,11 @@ int32_t killProcess(uint16_t pid) {
     if(scheduler->processes[pid]->unkillable) return -1;
 
     adoptChildren(pid);
-    unblockWaitingProcess(pid);
-
+    process_t *process = scheduler->processes[pid];
+    process_t * parent = scheduler->processes[process->parentPid];
+    if(parent != NULL && parent->status == BLOCKED && parent->waitingForPid == process->pid) {
+        unblockProcess(parent->pid);
+    }
     uint8_t contextSwitch = scheduler->processes[pid]->status == RUNNING;
     removeProcess(pid);
 
