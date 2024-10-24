@@ -34,7 +34,7 @@ static int initProcessMain(int argc, char **argv) {
     while(1) {
         for(int i=0; i<MAX_PROCESSES; i++) {
             if(scheduler->processes[i] != NULL) {
-                if(scheduler->processes[i]->status == TERMINATED) {
+                if(scheduler->processes[i]->status == TERMINATED && scheduler->processes[i]->parentPid == 0) {
                     freeProcessStructure(scheduler->processes[i]);
                     scheduler->processes[i] = NULL;
                     scheduler->processCount--;
@@ -44,7 +44,6 @@ static int initProcessMain(int argc, char **argv) {
         yield();
     }
 
-    return 0;
 }
 
 schedulerADT createScheduler() {
@@ -148,9 +147,16 @@ int32_t killProcess(uint16_t pid, int32_t retValue) {
 
     adoptChildren(pid);
     uint8_t contextSwitch = scheduler->processes[pid]->status == RUNNING;
-    freeProcessStructure(scheduler->processes[pid]);
-    scheduler->processes[pid] = NULL;
-    scheduler->processCount--;
+    scheduler->processes[pid]->status = TERMINATED;
+    scheduler->processes[pid]->retValue = retValue;
+
+    for (int i = 0; i < MAX_PROCESSES; i++) {
+        if (scheduler->processes[i] != NULL && scheduler->processes[i]->waitingForPid == pid) {
+            scheduler->processes[i]->waitingForPid = NO_PID;
+            unblockProcess(i);
+        }
+    }
+
     if(contextSwitch){
         yield();
     }
@@ -201,7 +207,7 @@ int32_t killCurrentProcess(int32_t retValue) {
 static void adoptChildren(int16_t pid) {
     for(int i = 0; i < MAX_PROCESSES; i++) {
         if(scheduler->processes[i] != NULL && scheduler->processes[i]->parentPid == pid) {
-            scheduler->processes[i]->parentPid = 0; // 0 is the init process
+            scheduler->processes[i]->parentPid = 0;
         }
     }
 }
@@ -233,4 +239,23 @@ processInfo_t * ps() {
     empty.pid = -1;
     psInfo[count] = empty;
     return psInfo;
+}
+
+int64_t waitPid(uint32_t pid) {
+    if(scheduler == NULL) return -1;
+    if(pid >= MAX_PROCESSES) return -1;
+    if(scheduler->processes[pid] == NULL) return -1;
+    if(scheduler->processes[pid]->parentPid != scheduler->current) return -1;
+
+    scheduler->processes[scheduler->current]->waitingForPid = pid;
+    blockProcess(scheduler->current);
+
+    scheduler->processes[scheduler->current]->waitingForPid = NO_PID;
+    int64_t retValue = scheduler->processes[pid]->retValue;
+
+    my_free(scheduler->processes[pid]);
+    scheduler->processes[pid] = NULL;
+    scheduler->processCount--;
+
+    return retValue;
 }
