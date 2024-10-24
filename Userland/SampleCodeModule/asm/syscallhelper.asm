@@ -22,6 +22,11 @@ GLOBAL _sys_exit
 GLOBAL _sys_malloc
 GLOBAL _sys_free
 GLOBAL _sys_ps
+GLOBAL _sys_semOpen
+GLOBAL _sys_semClose
+GLOBAL _sys_semWait
+GLOBAL _sys_semPost
+GLOBAL _sys_waitpid
 
 section .text
 
@@ -54,3 +59,8 @@ _sys_exit: syscall 0x13
 _sys_malloc: syscall 0x14
 _sys_free: syscall 0x15
 _sys_ps: syscall 0x16
+_sys_semOpen: syscall 0x17
+_sys_semClose: syscall 0x18
+_sys_semWait: syscall 0x19
+_sys_semPost: syscall 0x1A
+_sys_waitpid: syscall 0x1B

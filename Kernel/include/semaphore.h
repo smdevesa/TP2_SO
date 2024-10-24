@@ -14,5 +14,7 @@ void initSemManager();
 int64_t semOpen(char * name, int initialValue);
 int64_t semClose(char * name);
 int64_t semWait(char * name);
+int64_t semPost(char * name);
+
 
 #endif //TP2_SO_SEMAPHORE_H

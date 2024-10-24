@@ -3,7 +3,7 @@
 
 enum syscalls {READ = 0, WRITE, RECTANGLE, CLEAR, COORDS, SCREENINFO, FONTINFO, GETTIME, SETSCALE,
         GETREGS, SLEEP, PLAYSOUND, YIELD, GETPID, CREATE_PROCESS, KILL_PROCESS, BLOCK, UNBLOCK, CHANGE_PRIORITY,
-        EXIT, MALLOC, FREE, PS};
+        EXIT, MALLOC, FREE, PS, SEM_OPEN, SEM_CLOSE, SEM_WAIT, SEM_POST, WAITPID};
 
 uint64_t syscallDispatcher(int64_t rdi, int64_t rsi, int64_t rdx, int64_t rcx, int64_t r8, int64_t rax) {
     // rax contains the syscall id
@@ -31,6 +31,11 @@ uint64_t syscallDispatcher(int64_t rdi, int64_t rsi, int64_t rdx, int64_t rcx, i
         case MALLOC: return sys_malloc(rdi);
         case FREE: return sys_free(rdi);
         case PS: return sys_ps();
+        case SEM_OPEN: return sys_semOpen((char *) rdi, rsi);
+        case SEM_CLOSE: return sys_semClose((char *) rdi);
+        case SEM_WAIT: return sys_semWait((char *) rdi);
+        case SEM_POST: return sys_semPost((char *) rdi);
+        case WAITPID: return sys_waitpid(rdi);
         default: return 0;
     }
 }
