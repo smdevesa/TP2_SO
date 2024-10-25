@@ -130,7 +130,6 @@ int64_t semOpen(char * name, int initialValue) {
 
 int64_t semClose(char * name) {
     if(semaphoreManager == NULL) return -1;
-    sys_write(1, "semClose: ", 9, 0x00FFFFFF);
     acquire(&semaphoreManager->lock);
     int idx = getIdxByName(name);
     if(idx == -1) {
@@ -141,14 +140,12 @@ int64_t semClose(char * name) {
     semaphore_t * sem = semaphoreManager->semaphores[idx];
     if(sem->using > 1) {
         acquire(&sem->lock);
-        sys_write(1, "decrementing using\n", 20, 0x00FFFFFF);
         sem->using--;
         release(&sem->lock);
         release(&semaphoreManager->lock);
         return 0;
     }
 
-    sys_write(1, "semClose freeing sem\n", 22, 0x00FFFFFF);
     my_free(sem);
     semaphoreManager->semaphores[idx] = NULL;
     semaphoreManager->semaphoresCount--;
@@ -157,7 +154,6 @@ int64_t semClose(char * name) {
 }
 
 int64_t semWait(char * name) {
-    sys_write(1, "semWait: ", 8, 0x00FFFFFF);
     if (semaphoreManager == NULL) return -1;
 
     acquire(&semaphoreManager->lock);
@@ -178,17 +174,12 @@ int64_t semWait(char * name) {
         return -1;
     }
     release(&sem->lock);
-    sys_write(1, "Blocking process: ", 18, 0x00FFFFFF);
-    char pidStr[1] = {(char)pid + '0'};
-    sys_write(1, pidStr, 1, 0x00FFFFFF);
-    sys_write(1, "\n", 1, 0);
     blockProcess(pid);
     return 0;
 }
 
 
 int64_t semPost(char * name) {
-    sys_write(1, "semPost: ", 8, 0x00FFFFFF);
     if (semaphoreManager == NULL) return -1;
 
     acquire(&semaphoreManager->lock);
@@ -201,13 +192,8 @@ int64_t semPost(char * name) {
 
     if (sem->queue.size > 0) {
         uint32_t pid = popFromQueue(sem);
-        sys_write(1, "Unblocking process: ", 20, 0x00FFFFFF);
-        char pidstr[1] = {pid + '0'};
-        sys_write(1, pidstr, 1, 0x00FFFFFF);
-        sys_write(1, "\n", 1, 0);
         unblockProcess(pid);
     } else {
-        sys_write(1, "Increasing semaphore value\n", 27, 0x00FFFFFF);
         sem->value++;
     }
 

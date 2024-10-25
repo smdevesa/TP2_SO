@@ -199,10 +199,6 @@ int unblockProcess(uint16_t pid){
     if(scheduler->processes[pid]->status != BLOCKED) return -1;
 
     scheduler->processes[pid]->status = READY;
-    sys_write(1, "Unblocked process: ", 20, 0x00FFFFFF);
-    char pidStr[1] = {(char)pid + '0'};
-    sys_write(1, pidStr, 1, 0x00FFFFFF);
-    sys_write(1, "\n", 1, 0);
     return 0;
 }
 
@@ -284,7 +280,6 @@ void my_exit(int64_t retValue) {
     currentProcess->retValue = retValue;
     process_t * parent = scheduler->processes[currentProcess->parentPid];
     if(parent != NULL && parent->status == BLOCKED && parent->waitingForPid == currentProcess->pid) {
-        sys_write(1, "Unblocking parent\n", 18, 0x00FFFFFF);
         unblockProcess(parent->pid);
     }
     yield();

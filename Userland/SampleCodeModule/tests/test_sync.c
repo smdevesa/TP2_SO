@@ -41,19 +41,15 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
     uint64_t i;
     for (i = 0; i < n; i++) {
         if (use_sem) {
-            printf("waiting for semaphore, pid: %d\n", my_getpid());
             my_sem_wait(SEM_ID);
-            printf("took semaphore, pid: %d\n", my_getpid());
         }
         slowInc(&global, inc);
         if (use_sem) {
             my_sem_post(SEM_ID);
-            printf("released semaphore, pid: %d\n", my_getpid());
         }
     }
 
     if (use_sem) {
-        printf("closing semaphore, pid: %d\n", my_getpid());
         my_sem_close(SEM_ID);
     }
 
