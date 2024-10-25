@@ -192,4 +192,41 @@ uint64_t sys_free(uint64_t ptr);
  * @brief Returns the process list terminated with a process with pid == -1.
  */
 uint64_t sys_ps();
+
+/**
+ * @brief Opens a new named semaphore.
+ * @param name the name of the semaphore.
+ * @param initialValue the initial value of the semaphore.
+ * @return 0 if the semaphore was opened successfully, -1 if the semaphore was not opened.
+ */
+int64_t sys_semOpen(char * name, uint64_t initialValue);
+
+/**
+ * @brief Closes a named semaphore.
+ * @param name the name of the semaphore.
+ * @return 0 if the semaphore was closed
+ */
+int64_t sys_semClose(char * name);
+
+/**
+ * @brief Waits for a named semaphore.
+ * @param name the name of the semaphore.
+ * @return 0 if the semaphore was waited, -1 if the semaphore was not waited.
+ */
+int64_t sys_semWait(char * name);
+
+/**
+ * @brief Posts a named semaphore.
+ * @param name the name of the semaphore.
+ * @return 0 if the semaphore was posted, -1 if the semaphore was not posted.
+ */
+int64_t sys_semPost(char * name);
+
+/**
+ * @brief Waits for a process to finish.
+ * @param pid the PID of the process to wait.
+ * @return the return value of the process.
+ */
+int64_t sys_waitpid(uint16_t pid);
+
 #endif

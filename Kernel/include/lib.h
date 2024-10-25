@@ -28,6 +28,8 @@ char * itoaHex(uint64_t num, char * str);
 
 void strncpy(char *dest, const char *src, size_t size);
 
+int strcmp(const char *s1, const char *s2);
+
 
 
 

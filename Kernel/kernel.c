@@ -4,6 +4,7 @@
 #include <idtLoader.h>
 #include <memory_manager.h>
 #include <scheduler.h>
+#include <semaphore.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -49,6 +50,7 @@ int main()
 {
     my_mem_init(START_FREE_MEM, MEM_SIZE);
     createScheduler();
+    initSemManager();
     load_idt();
     return 0;
 }

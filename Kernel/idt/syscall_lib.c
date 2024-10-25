@@ -8,6 +8,7 @@
 #include <interrupts.h>
 #include <scheduler.h>
 #include <memory_manager.h>
+#include <semaphore.h>
 
 #define STDIN 0
 #define STDOUT 1
@@ -188,11 +189,12 @@ int64_t sys_changePriority(uint16_t pid, uint8_t newPriority) {
 }
 
 int64_t sys_killProcess(uint16_t pid) {
-    return killProcess(pid, 0);
+    return killProcess(pid);
 }
 
 int64_t sys_exit(int64_t retValue) {
-    return killCurrentProcess(retValue);
+    my_exit(retValue);
+    return 1;
 }
 
 uint64_t sys_malloc(uint64_t size) {
@@ -206,4 +208,25 @@ uint64_t sys_free(uint64_t ptr) {
 
 uint64_t sys_ps() {
     return (uint64_t) ps();
+}
+
+int64_t sys_semOpen(char * name, uint64_t initialValue){
+    return semOpen(name, initialValue);
+}
+
+int64_t sys_semClose(char * name){
+    return semClose(name);
+}
+
+int64_t sys_semWait(char * name){
+    return semWait(name);
+}
+
+
+int64_t sys_semPost(char * name){
+    return semPost(name);
+}
+
+int64_t sys_waitpid(uint16_t pid){
+    return waitPid(pid);
 }

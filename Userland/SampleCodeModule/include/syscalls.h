@@ -224,6 +224,44 @@ void _sys_free(void *ptr);
  */
 processInfo_t * _sys_ps();
 
+/**
+ * @brief Opens a semaphore.
+ * @param name: the name of the semaphore.
+ * @param initialValue: the initial value of the semaphore.
+ * @return 0 if the semaphore was opened successfully, -1 otherwise.
+ */
+int64_t _sys_semOpen(char * name, uint64_t initialValue);
+
+/**
+ * @brief Closes a semaphore.
+ * @param name: the name of the semaphore.
+ * @return 0 if the semaphore was closed successfully, -1 otherwise.
+ */
+int64_t _sys_semClose(char * name);
+
+/**
+ * @brief Waits for a semaphore.
+ * @param name: the name of the semaphore.
+ * @return 0 if the semaphore was waited
+ *        -1 if the semaphore was not waited
+ */
+int64_t _sys_semWait(char * name);
+
+/**
+ * @brief Posts a semaphore.
+ * @param name: the name of the semaphore.
+ * @return 0 if the semaphore was posted
+ *        -1 if the semaphore was not posted
+ */
+int64_t _sys_semPost(char * name);
+
+/**
+ * @brief Waits for a process to finish.
+ * @param pid the process id.
+ * @return the return value of the process.
+ */
+int64_t _sys_waitpid(uint32_t pid);
+
 
 
 #endif

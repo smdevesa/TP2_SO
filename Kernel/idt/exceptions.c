@@ -29,10 +29,10 @@ static int regsAmount = (sizeof(regNames) / sizeof(regNames[0]));
 
 void exceptionDispatcher(int exception) {
     char * message;
-    if (exception == ZERO_EXCEPTION_ID)
-        message = EXCEPTION_ZERO;
-    else if (exception == OPCODE_EXCEPTION_ID){
-        message = EXCEPTION_OPCODE;
+    switch (exception) {
+        case ZERO_EXCEPTION_ID: message = EXCEPTION_ZERO; break;
+        case OPCODE_EXCEPTION_ID: message = EXCEPTION_OPCODE; break;
+        default: message = "Unknown exception\n\n"; break;
     }
     launchException(message);
 }

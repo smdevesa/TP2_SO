@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <scheduler.h>
 #include <lib.h>
+#include <syscall_lib.h>
 
 #define STACK_SIZE 4096
 #define MAX_NAME_LENGTH 256
@@ -81,8 +82,8 @@ static char ** allocArgs(char **args) {
 
 void processCaller(mainFunction main, char **args) {
     int argc = argsLen(args);
-    int retValue = main(argc, args);
-    killCurrentProcess(retValue);
+    int64_t retValue = main(argc, args);
+    sys_exit(retValue);
 }
 
 static int argsLen(char **array) {

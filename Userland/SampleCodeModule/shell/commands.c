@@ -14,23 +14,12 @@
 #define ERROR_PRIMARY_COLOR 0x00B63831
 #define ERROR_SECONDARY_COLOR 0x00DD5E56
 
-static char * commands[][2] = {
-        {"help", "Shows the available commands."},
-        {"clear", "Clears the screen."},
-        {"exit", "Exits the shell."},
-        {"date", "Shows the current date and time."},
-        {"fontscale", "Sets the font scale. Usage: fontscale [1, 2, 3]"},
-        {"inforeg", "Shows the registers values."},
-        {"eliminator", "Starts the Eliminator game."},
-        {"exception", "To test exceptions. Usage: exception [zero, invalidOpcode]"},
-        {"tmm", "Tests memory manager."},
-        {"ts", "Tests the scheduler."},
-        {"tp", "Tests priority."},
-        {"ps", "Shows the process list."},
-        {"kill", "Kills a process. Usage: kill [pid]"}
-};
-
-#define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))
+typedef struct command {
+    char * name;
+    char * description;
+    uint8_t builtin;
+    int (*function)(int argc, char * argv[]);
+} command_t;
 
 extern void _invalidOp();
 static int helpCommand(int argc, char * argv[]);
@@ -49,25 +38,30 @@ static int psCommand(int argc, char * argv[]);
 static int killCommand(int argc, char * argv[]);
 static int testMemoryManagerCommand(int argc, char * argv[]);
 static void printPsHeader();
+static int testSyncCommand(int argc, char * argv[]);
+
+static command_t commands[] = {
+        {"help", "Shows the available commands.", 1, &helpCommand},
+        {"clear", "Clears the screen.", 1, &clearCommand},
+        {"exit", "Exits the shell.", 1, &exitCommand},
+        {"date", "Shows the current date and time.", 1, &dateCommand},
+        {"fontscale", "Sets the font scale. Usage: fontscale [1, 2, 3]", 1, &fontscaleCommand},
+        {"inforeg", "Shows the registers values.", 1, &inforegCommand},
+        {"eliminator", "Starts the Eliminator game.", 1, &eliminatorCommand},
+        {"exception", "To test exceptions. Usage: exception [zero, invalidOpcode]", 1, &exceptionCommand},
+        {"tmm", "Tests memory manager.", 0, &testMemoryManagerCommand},
+        {"ts", "Tests the scheduler.", 0, &testSchedulerCommand},
+        {"tp", "Tests priority.", 0, &testPriorityCommand},
+        {"ps", "Shows the process list.", 1, &psCommand},
+        {"kill", "Kills a process. Usage: kill [pid]", 1, &killCommand},
+        {"tsy", "Tests the synchronization primitives. Usage: tsy [n] [use_sem]", 0, &testSyncCommand}
+};
+
+#define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))
 
 // Default scale
 static int scale = 1;
-
-static int (*commandFunctions[])(int argc, char * argv[]) = {
-    helpCommand,
-    clearCommand,
-    exitCommand,
-    dateCommand,
-    fontscaleCommand,
-    inforegCommand,
-    eliminatorCommand,
-    exceptionCommand,
-    testMemoryManagerCommand,
-    testSchedulerCommand,
-    testPriorityCommand,
-    psCommand,
-    killCommand
-};
+static uint8_t foreground = 1;
 
 static const char * regNames[REGS_AMOUNT] = {
         "RAX", "RBX", "RCX", "RDX", "RSI", "RDI", "RBP", "R8 ", "R9 ", "R10", "R11", "R12", "R13", "R14", "R15", "RIP", "RSP"
@@ -75,8 +69,8 @@ static const char * regNames[REGS_AMOUNT] = {
 
 static int helpCommand(int argc, char * argv[]) {
     for(int i=0; i<COMMANDS_COUNT; i++) {
-        printStringColor(commands[i][0], COMMAND_SECONDARY_COLOR);
-        printf(": %s\n", commands[i][1]);
+        printStringColor(commands[i].name, COMMAND_SECONDARY_COLOR);
+        printf(": %s\n", commands[i].description);
     }
     return OK;
 }
@@ -177,47 +171,76 @@ static void printError(char * command, char * message, char * usage) {
         putchar('\n');
 }
 
-int parseCommand(char * input) {
-    if(input == NULL) {
+int parseCommand(char *input) {
+    if (input == NULL) {
         return INPUT_ERROR;
     }
 
-    char * args[MAX_ARGS] = {0};
-    char * command;
-
+    char *args[MAX_ARGS] = {0};
+    char *command = NULL;
     int argsCount = fillCommandAndArgs(&command, args, input);
-    if(argsCount == INPUT_ERROR) {
+    if (argsCount == INPUT_ERROR) {
         return INPUT_ERROR;
     }
 
-    for(int i=0; i<COMMANDS_COUNT; i++) {
-        if(strcmp(command, commands[i][0]) == 0) {
-            return commandFunctions[i](argsCount, args);
+    for (int i = 0; i < COMMANDS_COUNT; i++) {
+        if (strcmp(command, commands[i].name) == 0) {
+            if (commands[i].builtin) {
+                return commands[i].function(argsCount, args);
+            } else {
+                int pid = commands[i].function(argsCount, args);
+                if (pid != -1) {
+                    if (foreground) {
+                        return _sys_waitpid(pid);
+                    }
+                    return OK;
+                }
+                return ERROR;
+            }
         }
     }
     return INPUT_ERROR;
 }
 
-static int fillCommandAndArgs(char ** command, char * args[], char * input) {
+static int fillCommandAndArgs(char **command, char *args[], char *input) {
     int argsCount = 0;
+    foreground = 1;
     char *current = input;
+
+    while (*current == ' ') {
+        current++;
+    }
 
     *command = current;
 
-    while (*current != 0 && argsCount < MAX_ARGS) {
-        // Remove blanks
+    while (*current != 0) {
+        if (*current == '&' && (*(current + 1) == '\0' || *(current + 1) == ' ')) {
+            foreground = 0;
+            *current = 0;
+            break;
+        }
+
         if (*current == ' ') {
             *current = 0;
-            if(*(current + 1) != 0 && *(current + 1) != ' ') {
+
+            if (*(current + 1) != 0 && *(current + 1) != ' ' && *(current + 1) != '&') {
                 args[argsCount++] = current + 1;
+                if (argsCount >= MAX_ARGS) {
+                    break;
+                }
             }
         }
         current++;
     }
-    for(int i=0; i<argsCount; i++) {
+
+    if (argsCount == 0 && *command != 0) {
+        args[argsCount++] = *command;
     }
+
     return argsCount;
 }
+
+
 
 static int testSchedulerCommand(int argc, char *argv[]) {
     if(argc != 1) {
@@ -243,9 +266,9 @@ static int testPriorityCommand(int argc, char *argv[]) {
     int pid = _sys_createProcess((mainFunction)&test_prio, args, "test_priority", 1, 0);
     if(pid == -1) {
         printError("test_priority", "Error creating process.", NULL);
-        return ERROR;
+        return -1;
     }
-    return OK;
+    return pid;
 }
 
 static void printPsHeader() {
@@ -293,14 +316,28 @@ static int killCommand(int argc, char * argv[]) {
 static int testMemoryManagerCommand(int argc, char * argv[]) {
     if(argc != 1) {
         printError("test_memory_manager", "Invalid amount of arguments.", "tmm [mem_amount]");
-        return ERROR;
+        return -1;
     }
     // const because of naive mm
     char * args[] = {"524288", NULL};
     int pid = _sys_createProcess((mainFunction)&test_mm, args, "test_memory_manager", 1, 0);
     if(pid == -1) {
         printError("test_memory_manager", "Error creating process.", NULL);
-        return ERROR;
+        return -1;
     }
-    return OK;
+    return pid;
+}
+
+static int testSyncCommand(int argc, char * argv[]) {
+    if(argc != 2) {
+        printError("test_sync", "Invalid amount of arguments.", "tsy [n] [use_sem]");
+        return -1;
+    }
+    char * args[] = {argv[0], argv[1], NULL};
+    int pid = _sys_createProcess((mainFunction)&test_sync, args, "test_sync", 1, 0);
+    if(pid == -1) {
+        printError("test_sync", "Error creating process.", NULL);
+        return -1;
+    }
+    return pid;
 }
