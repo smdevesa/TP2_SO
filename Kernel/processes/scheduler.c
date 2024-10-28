@@ -3,8 +3,6 @@
 #include <memoryPositions.h>
 #include <stddef.h>
 #include <lib.h>
-#include <syscall_lib.h>
-#include <videoDriver.h>
 
 extern void _hlt();
 extern void _forceNextProcess();
@@ -115,9 +113,6 @@ void * schedule(void *prevRSP) {
     scheduler->current = nextProcess->pid;
     uint64_t nextRSP = (uint64_t)nextProcess->stackPos;
     nextProcess->status = RUNNING;
-
-    char pidStr = nextProcess->pid + '0';
-    drawChar(pidStr, 0x0000FF00, 0x00000000, 1000, 10);
 
     return (void *)nextRSP;
 }
