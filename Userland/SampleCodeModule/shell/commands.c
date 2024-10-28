@@ -191,7 +191,7 @@ int parseCommand(char *input) {
                 int pid = commands[i].function(argsCount, args);
                 if (pid != -1) {
                     if (foreground) {
-                        return _sys_waitpid(pid);
+                        _sys_waitpid(pid);
                     }
                     return OK;
                 }
@@ -233,10 +233,6 @@ static int fillCommandAndArgs(char **command, char *args[], char *input) {
         current++;
     }
 
-    if (argsCount == 0 && *command != 0) {
-        args[argsCount++] = *command;
-    }
-
     return argsCount;
 }
 
@@ -258,7 +254,7 @@ static int testSchedulerCommand(int argc, char *argv[]) {
         printError("test_scheduler", "Error creating process.", NULL);
         return ERROR;
     }
-    return OK;
+    return pid;
 }
 
 static int testPriorityCommand(int argc, char *argv[]) {
