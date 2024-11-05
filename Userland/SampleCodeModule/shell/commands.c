@@ -1,7 +1,7 @@
 #include <commands.h>
 #include <iolib.h>
 #include <stringutils.h>
-#include <time.h>
+#include <programs.h>
 #include <syscalls.h>
 #include <test_util.h>
 
@@ -43,7 +43,8 @@ static command_t commands[] = {
         {"tp", "Tests priority.", 0, (mainFunction)&test_prio},
         {"ps", "Shows the process list.", 1, &psCommand},
         {"kill", "Kills a process. Usage: kill [pid]", 1, &killCommand},
-        {"tsy", "Tests the synchronization primitives. Usage: tsy [n] [use_sem]", 0, (mainFunction)&test_sync}
+        {"tsy", "Tests the synchronization primitives. Usage: tsy [n] [use_sem]", 0, (mainFunction)&test_sync},
+        {"cat", "Prints stdin as received.", 0, (mainFunction)&cat}
 };
 
 #define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))
