@@ -247,3 +247,12 @@ int64_t sys_semPost(char * name){
 int64_t sys_waitpid(uint16_t pid){
     return waitPid(pid);
 }
+
+int64_t sys_create_pipe(int fds[2]){
+    return createPipe(fds);
+}
+
+int64_t sys_destroy_pipe(int writeFd){
+    destroyPipe(writeFd);
+    return 1;
+}

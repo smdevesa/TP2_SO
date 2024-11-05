@@ -96,8 +96,8 @@ int readPipe(int fd, char *buffer, int bytes) {
     return bytes;
 }
 
-void destroyPipe(int fds[2]) {
-    int index = getIndexByFd(fds[0], 0);
+void destroyPipe(int writeFd) {
+    int index = getIndexByFd(writeFd, 1);
     if (index == -1) return;
     pipe_t *pipe = pipes[index];
     semClose(pipe->writeSem);

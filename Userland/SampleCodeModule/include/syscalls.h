@@ -262,6 +262,18 @@ int64_t _sys_semPost(char * name);
  */
 int64_t _sys_waitpid(uint32_t pid);
 
+/**
+ * @brief Creates a pipe.
+ * @param fds the file descriptors of the pipe.
+ * @return 0 if the pipe was created successfully, -1 otherwise.
+ */
+int64_t _sys_create_pipe(int fds[2]);
 
+/**
+ * @brief Destroys a pipe.
+ * @param writeFd the write file descriptor of the pipe.
+ * @return 0 if the pipe was destroyed successfully, -1 otherwise.
+ */
+int64_t _sys_destroy_pipe(int writeFd);
 
 #endif
