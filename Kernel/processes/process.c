@@ -16,7 +16,9 @@ void processCaller(mainFunction main, char **args);
 static char ** allocArgs(char **args);
 static void freeArgs(char ** args);
 
-process_t *createProcessStructure(uint16_t pid, uint16_t parentPid, uint16_t waitingForPid, mainFunction main, char **argv, char *name, uint8_t priority, uint8_t unkillable) {
+process_t *createProcessStructure(uint16_t pid, uint16_t parentPid, uint16_t waitingForPid, mainFunction main,
+                                  char **argv, char *name, uint8_t priority, uint8_t unkillable,
+                                  uint16_t writeFd, uint16_t readFd) {
     process_t *p = my_malloc(sizeof(process_t));
     if (p == NULL) return NULL;
 
@@ -27,6 +29,8 @@ process_t *createProcessStructure(uint16_t pid, uint16_t parentPid, uint16_t wai
     p->remainingQuantum = priority;
     p->unkillable = unkillable;
     p->status = READY;
+    p->writeFd = writeFd;
+    p->readFd = readFd;
     p->stackBase = my_malloc(STACK_SIZE);
     if (p->stackBase == NULL) {
         my_free(p);

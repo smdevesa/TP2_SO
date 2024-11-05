@@ -4,8 +4,11 @@
 #include <stdint.h>
 typedef int (*mainFunction)(int argc, char **argv);
 
+#define STDIN 0
+#define STDOUT 1
+
 int64_t my_getpid();
-int64_t my_create_process(mainFunction main, char **argv, char *name, uint8_t priority, uint8_t unkillable);
+int64_t my_create_process(mainFunction main, char **argv, char *name, uint8_t unkillable, int* fileDescriptors);
 int64_t my_nice(uint64_t pid, uint64_t newPrio);
 int64_t my_kill(uint64_t pid);
 int64_t my_block(uint64_t pid);

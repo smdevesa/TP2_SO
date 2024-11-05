@@ -10,9 +10,6 @@
 #include <memory_manager.h>
 #include <semaphore.h>
 
-#define STDIN 0
-#define STDOUT 1
-
 #define TAB_SIZE 4
 
 #define WHITE 0x00FFFFFF
@@ -172,8 +169,8 @@ uint64_t sys_getPid() {
     return getPid();
 }
 
-int64_t sys_createProcess(uint64_t main, char **argv, char *name, uint8_t priority, uint8_t unkillable) {
-    return addProcess((mainFunction)main, argv, name, priority, unkillable);
+int64_t sys_createProcess(uint64_t main, char **argv, char *name, uint8_t unkillable, int *fileDescriptors) {
+    return addProcess((mainFunction)main, argv, name, unkillable, fileDescriptors);
 }
 
 int64_t sys_blockProcess(uint16_t pid) {

@@ -4,6 +4,8 @@
 #include <stdint.h>
 
 #define REGS_AMOUNT 17
+#define STDIN 0
+#define STDOUT 1
 
 enum registers_idx {
     RAX_IDX = 0,
@@ -130,14 +132,14 @@ uint64_t sys_getPid();
 
 /**
  * @brief Creates a new process.
- * @param main: the main function of the process.
- * @param argv: the arguments of the process.
- * @param name: the name of the process.
- * @param priority: the priority of the process.
- * @param unkillable: 1 if the process is unkillable, 0 otherwise.
- * @return the PID of the new process.
+ * @param main the main function of the process.
+ * @param argv the arguments of the process.
+ * @param name the name of the process.
+ * @param unkillable if the process is unkillable.
+ * @param fileDescriptors the file descriptors of the process. On index 0 is the input file descriptor and on index 1 is the output file descriptor.
+ * @return
  */
-int64_t sys_createProcess(uint64_t main, char **argv, char *name, uint8_t priority, uint8_t unkillable);
+int64_t sys_createProcess(uint64_t main, char **argv, char *name, uint8_t unkillable, int *fileDescriptors);
 
 /**
  * @brief Blocks the process with the given PID.

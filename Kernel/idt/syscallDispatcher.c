@@ -22,7 +22,7 @@ uint64_t syscallDispatcher(int64_t rdi, int64_t rsi, int64_t rdx, int64_t rcx, i
         case PLAYSOUND: return sys_playSound(rdi, rsi);
         case YIELD: return sys_yield();
         case GETPID: return sys_getPid();
-        case CREATE_PROCESS: return sys_createProcess(rdi, (char **) rsi, (char *) rdx, (uint8_t) rcx, (uint8_t) r8);
+        case CREATE_PROCESS: return sys_createProcess(rdi, (char **) rsi, (char *) rdx, (uint8_t) rcx, (int *) r8);
         case KILL_PROCESS: return sys_killProcess(rdi);
         case BLOCK: return sys_blockProcess(rdi);
         case UNBLOCK: return sys_unblockProcess(rdi);

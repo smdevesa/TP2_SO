@@ -3,6 +3,7 @@
 #include <memoryPositions.h>
 #include <stddef.h>
 #include <lib.h>
+#include <syscall_lib.h>
 
 extern void _hlt();
 extern void _forceNextProcess();
@@ -27,8 +28,8 @@ static void removeProcess(uint16_t pid);
 
 static int initProcessMain(int argc, char **argv) {
     char ** args = {NULL};
-    addProcess((mainFunction)SHELL_ADDRESS, args, "shell",
-               1, 0);
+    int fds[2] = {STDIN, STDOUT};
+    addProcess((mainFunction)SHELL_ADDRESS, args, "shell",0, fds);
 
     while(1) {
         for(int i=0; i<MAX_PROCESSES; i++) {
@@ -53,7 +54,8 @@ schedulerADT createScheduler() {
     scheduler->current = NO_PID;
 
     char *argv[] = {NULL};
-    addProcess((mainFunction)&initProcessMain, argv, "init", MIN_PRIORITY, 1);
+    int fds[2] = {STDIN, STDOUT};
+    addProcess((mainFunction)&initProcessMain, argv, "init", 1, fds);
     return scheduler;
 }
 
@@ -119,10 +121,10 @@ void * schedule(void *prevRSP) {
 
 
 
-int64_t addProcess(mainFunction main, char **argv, char *name, uint8_t priority, uint8_t unkillable) {
+int64_t addProcess(mainFunction main, char **argv, char *name, uint8_t unkillable, int* fileDescriptors) {
     if(scheduler == NULL) return NO_PID;
     if(scheduler->processCount >= MAX_PROCESSES) return NO_PID;
-    if(priority < MIN_PRIORITY || priority > MAX_PRIORITY) return NO_PID;
+    if(fileDescriptors == NULL) return NO_PID;
 
     uint16_t newPid;
     for(newPid = 0; newPid < MAX_PROCESSES; newPid++) {
@@ -130,7 +132,9 @@ int64_t addProcess(mainFunction main, char **argv, char *name, uint8_t priority,
     }
     uint16_t parentPid = (scheduler->current != NO_PID) ? scheduler->current : NO_PID;
 
-    process_t *newProcess = createProcessStructure(newPid, parentPid, NO_PID, main, argv, name, priority, unkillable);
+    process_t *newProcess = createProcessStructure(newPid, parentPid, NO_PID, main,
+                                                   argv, name, MIN_PRIORITY, unkillable,
+                                                   fileDescriptors[1], fileDescriptors[0]);
     if (newProcess == NULL) return NO_PID;
 
     scheduler->processes[newPid] = newProcess;
