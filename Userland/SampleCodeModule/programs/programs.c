@@ -3,7 +3,7 @@
 #include <syscalls.h>
 
 int cat(int argc, char **argv) {
-    if(argc > 2) {
+    if(argc > 1) {
         printf("cat: too many arguments\n");
         return 1;
     }
