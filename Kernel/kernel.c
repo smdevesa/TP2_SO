@@ -5,6 +5,7 @@
 #include <memory_manager.h>
 #include <scheduler.h>
 #include <semaphore.h>
+#include <pipes.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -51,6 +52,7 @@ int main()
     my_mem_init(START_FREE_MEM, MEM_SIZE);
     createScheduler();
     initSemManager();
+    initPipes();
     load_idt();
     return 0;
 }

@@ -67,6 +67,25 @@ void reverse(char *str) {
     }
 }
 
+char * itoa(int num, char * str) {
+    int i = 0;
+    int isNegative = 0;
+    if (num < 0) {
+        isNegative = 1;
+        num = -num;
+    }
+    while (num != 0) {
+        str[i++] = num % 10 + '0';
+        num /= 10;
+    }
+    if (isNegative) {
+        str[i++] = '-';
+    }
+    str[i] = 0;
+    reverse(str);
+    return str;
+}
+
 char * itoaHex(uint64_t num, char * str) {
     int i = 0;
     while (num != 0) {
@@ -84,6 +103,16 @@ void strncpy(char *dest, const char *src, size_t size) {
         dest[i] = src[i];
         if (src[i] == 0) break;
     }
+}
+
+int strcat(char *dest, const char *src) {
+    size_t dest_len = strlen(dest);
+    size_t i;
+    for (i = 0; src[i] != '\0'; i++) {
+        dest[dest_len + i] = src[i];
+    }
+    dest[dest_len + i] = '\0';
+    return dest_len + i;
 }
 
 int strcmp(const char *s1, const char *s2) {
