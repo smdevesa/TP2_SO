@@ -3,7 +3,6 @@
 #include <stringutils.h>
 #include <time.h>
 #include <syscalls.h>
-#include <eliminator.h>
 #include <test_util.h>
 
 #define HELP_IDX 0
