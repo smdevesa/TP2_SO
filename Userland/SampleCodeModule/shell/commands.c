@@ -50,8 +50,6 @@ static command_t commands[] = {
 #define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))
 
 static uint8_t foreground = 1;
-static int writeFd = STDIN_FD;
-static int readFd = STDOUT_FD;
 
 static const char * regNames[REGS_AMOUNT] = {
         "RAX", "RBX", "RCX", "RDX", "RSI", "RDI", "RBP", "R8 ", "R9 ", "R10", "R11", "R12", "R13", "R14", "R15", "RIP", "RSP"
@@ -74,7 +72,7 @@ int parseCommand(char *input) {
             if (commands[i].builtin) {
                 return commands[i].function(argsCount, args);
             } else {
-                int fds[2] = {writeFd, readFd};
+                int fds[2] = {STDOUT_FD, STDIN_FD};
                 return createProcessWrapper(commands[i].function, args, command, fds);
             }
         }
@@ -85,8 +83,6 @@ int parseCommand(char *input) {
 static int fillCommandAndArgs(char **command, char *args[], char *input) {
     int argsCount = 0;
     foreground = 1;
-    writeFd = STDIN_FD;
-    readFd = STDOUT_FD;
     char *current = input;
 
     while (*current == ' ') {
