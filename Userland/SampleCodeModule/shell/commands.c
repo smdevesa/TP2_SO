@@ -26,11 +26,9 @@ static int createProcessWrapper(mainFunction main, char ** argv, char * name, in
 static int helpCommand(int argc, char * argv[]);
 static int clearCommand(int argc, char * argv[]);
 static int exitCommand(int argc, char * argv[]);
-static int dateCommand(int argc, char * argv[]);
 static int inforegCommand(int argc, char * argv[]);
 static int fillCommandAndArgs(char ** command, char * args[], char * input);
 static void printError(char * command, char * message, char * usage);
-static int exceptionCommand(int argc, char * argv[]);
 static int psCommand(int argc, char * argv[]);
 static int killCommand(int argc, char * argv[]);
 static void printPsHeader();
@@ -39,9 +37,7 @@ static command_t commands[] = {
         {"help", "Shows the available commands.", 1, &helpCommand},
         {"clear", "Clears the screen.", 1, &clearCommand},
         {"exit", "Exits the shell.", 1, &exitCommand},
-        {"date", "Shows the current date and time.", 1, &dateCommand},
         {"inforeg", "Shows the registers values.", 1, &inforegCommand},
-        {"exception", "To test exceptions. Usage: exception [zero, invalidOpcode]", 1, &exceptionCommand},
         {"tmm", "Tests memory manager.", 0, (mainFunction)&test_mm},
         {"ts", "Tests the scheduler.", 0, (mainFunction)&test_processes},
         {"tp", "Tests priority.", 0, (mainFunction)&test_prio},
@@ -52,8 +48,6 @@ static command_t commands[] = {
 
 #define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))
 
-// Default scale
-static int scale = 1;
 static uint8_t foreground = 1;
 static int writeFd = STDIN_FD;
 static int readFd = STDOUT_FD;
@@ -154,22 +148,12 @@ static int exitCommand(int argc, char * argv[]) {
     return EXIT;
 }
 
-static int dateCommand(int argc, char * argv[]) {
-    printf("%d/%d/%d %d:%d:%d\n", getDay(), getMonth(), getYear(), getHours(), getMinutes(), getSeconds());
-    return OK;
-}
-
 static int inforegCommand(int argc, char * argv[]) {
     uint64_t regs[REGS_AMOUNT];
     int ok = _sys_getRegisters(regs);
     if(!ok) {
         printError("inforeg", "Registers are not updated. Use CTRL + R to update.", NULL);
         return ERROR;
-    }
-    char changed = 0;
-    if(scale == 3) {
-        changed = 1;
-        setFontScale(2);
     }
     for(int i=0; i<REGS_AMOUNT; i += 2) {
         printStringColor(regNames[i], COMMAND_SECONDARY_COLOR);
@@ -180,30 +164,6 @@ static int inforegCommand(int argc, char * argv[]) {
         }
         else
             putchar('\n');
-    }
-    if(changed) {
-        setFontScale(3);
-    }
-    return OK;
-}
-
-static int exceptionCommand(int argc, char * argv[]){
-    if(argc != 1 || argv[0] == NULL) {
-        printError("exception", "Invalid amount of arguments.", "exception [zero, invalidOpcode]");
-        return ERROR;
-    }
-    if(strcmp(argv[0], "zero") == 0) {
-        int a = 1;
-        int b = 0;
-        int c = a / b;
-        printf("c: %d\n", c);
-    }
-    else if(strcmp(argv[0], "invalidOpcode") == 0) {
-        _invalidOp();
-    }
-    else {
-        printError("exception", "Invalid exception type.", "exception [zero, invalidOpcode]");
-        return ERROR;
     }
     return OK;
 }
@@ -223,8 +183,6 @@ static void printPsHeader() {
 }
 
 static int psCommand(int argc, char * argv[]) {
-    int oldScale = scale;
-    setFontScale(1);
     processInfo_t * processList = _sys_ps();
     char * statusString[] = {"READY", "BLOCKED", "RUNNING", "TERMINATED"};
     processInfo_t * current = processList;
@@ -239,9 +197,6 @@ static int psCommand(int argc, char * argv[]) {
                statusString[current->status],
                (uint64_t)current->stackBase);
         current++;
-    }
-    if(oldScale != 1) {
-        setFontScale(oldScale);
     }
     return OK;
 }
