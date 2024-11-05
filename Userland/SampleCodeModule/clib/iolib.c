@@ -4,20 +4,15 @@
 #include <color.h>
 #include <stringutils.h>
 
-// Hardcoded because of lack of dynamic memory
 #define PRINTF_BUFFER_SIZE 100
 #define SCANF_BUFFER_SIZE 100
 
 char getchar() {
     char c;
-    int readBytes = 0;
-    while(readBytes != 1) {
-        readBytes = _sys_read(STDIN, &c, 1);
-    }
+    _sys_read(STDIN, &c, 1);
     return c;
 }
 
-// Reads from the buffer to the blank and returns the number of bytes read
 static int readToBlank(char * str, int index) {
     int readBytes = 0;
     for(int i=index; str[i] != 0 && str[i] != '\n' && str[i] != ' ' && str[i] != '\t'; i++) {
@@ -94,7 +89,6 @@ int printf(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
-    // Buffer to store the integer to string conversion
     char buffer[PRINTF_BUFFER_SIZE];
     char *str;
     int num;

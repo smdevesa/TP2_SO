@@ -9,6 +9,7 @@
 #include <scheduler.h>
 #include <memory_manager.h>
 #include <semaphore.h>
+#include <pipes.h>
 
 #define TAB_SIZE 4
 
@@ -16,55 +17,74 @@
 #define BLACK 0x00000000
 #define DEFAULT_BG_COLOR 0x00000000
 
-// Positioning variables
 static uint16_t print_x = 0;
 static uint16_t print_y = 0;
 
 uint32_t bgColor = DEFAULT_BG_COLOR;
 
 static int printSpecialCases(char c);
+static int printBuffer(const char * buffer, int count, uint32_t color);
 
-uint64_t sys_read(int fd, char * buffer, int count) {
-    // STDIN is the only file descriptor supported so far
-    if(fd != STDIN) {
-        return 0;
-    }
-    for(int i = 0; i < count; i++) {
-        char c = kb_getchar();
-        if(c == 0) {
-            return i;
+int64_t sys_read(int fd, char * buffer, int count) {
+    if(fd < 0 || count <= 0) return -1;
+
+    if(fd == STDIN) {
+        int fds[2];
+        getCurrentFDs(fds);
+        if(fds[0] != STDIN) {
+            return readPipe(fds[0], buffer, count);
         }
-        buffer[i] = c;
+        else {
+            for(int i = 0; i < count; i++) {
+                char c = kb_getchar();
+                if(c == 0) {
+                    return i;
+                }
+                buffer[i] = c;
+            }
+            return count;
+        }
     }
-    return count;
+    // if the file descriptor is not STDIN, it must be a pipe
+    return readPipe(fd, buffer, count);
 }
 
-uint64_t sys_write(int fd, const char * buffer, int count, uint32_t color) {
-    // STDOUT is the only file descriptor supported so far
+int64_t sys_write(int fd, const char * buffer, int count, uint32_t color) {
+    if(fd < 1 || count <= 0) return -1;
     if (fd == STDOUT) {
-        for(int i = 0; i < count; i++) {
-            if(buffer[i] != ESC) {
-                // Check if the character fits in the screen
-                if ((print_x + getFontWidth() * getScale()) > getScreenWidth()) {
-                    print_x = 0;
-                    print_y += getFontHeight() * getScale();
-                }
+        int fds[2];
+        getCurrentFDs(fds);
+        if(fds[1] != STDOUT) {
+            return writePipe(fds[1], buffer, count);
+        }
+        return printBuffer(buffer, count, color);
+    }
+    // if the file descriptor is not STDOUT, it must be a pipe
+    return writePipe(fd, buffer, count);
+}
 
-                if ((print_y + getFontHeight() * getScale()) > getScreenHeight()) {
-                    // No more space in the screen, return the number of characters written
-                    return count;
-                }
+static int printBuffer(const char * buffer, int count, uint32_t color) {
+    for(int i = 0; i < count; i++) {
+        if(buffer[i] != ESC) {
+            // Check if the character fits in the screen
+            if ((print_x + getFontWidth() * getScale()) > getScreenWidth()) {
+                print_x = 0;
+                print_y += getFontHeight() * getScale();
+            }
 
-                // Check if the character is a special case
-                if (!printSpecialCases(buffer[i])) {
-                    drawChar(buffer[i], color, bgColor, print_x, print_y);
-                    print_x += getFontWidth() * getScale();
-                }
+            if ((print_y + getFontHeight() * getScale()) > getScreenHeight()) {
+                // No more space in the screen, return the number of characters written
+                return i;
+            }
+
+            // Check if the character is a special case
+            if (!printSpecialCases(buffer[i])) {
+                drawChar(buffer[i], color, bgColor, print_x, print_y);
+                print_x += getFontWidth() * getScale();
             }
         }
-        return count;
     }
-    return 0;
+    return count;
 }
 
 static int printSpecialCases(char c) {

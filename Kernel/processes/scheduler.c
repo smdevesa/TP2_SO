@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <lib.h>
 #include <syscall_lib.h>
+#include <videoDriver.h>
 
 extern void _hlt();
 extern void _forceNextProcess();
@@ -29,7 +30,8 @@ static void removeProcess(uint16_t pid);
 static int initProcessMain(int argc, char **argv) {
     char ** args = {NULL};
     int fds[2] = {STDIN, STDOUT};
-    addProcess((mainFunction)SHELL_ADDRESS, args, "shell",0, fds);
+    int pid = addProcess((mainFunction)SHELL_ADDRESS, args, "shell",0, fds);
+    changePriority(pid, MAX_PRIORITY);
 
     while(1) {
         for(int i=0; i<MAX_PROCESSES; i++) {
@@ -115,6 +117,15 @@ void * schedule(void *prevRSP) {
     scheduler->current = nextProcess->pid;
     uint64_t nextRSP = (uint64_t)nextProcess->stackPos;
     nextProcess->status = RUNNING;
+
+    char current[10];
+    itoa(nextProcess->pid, current);
+    for(int i=0; i<10; i++) {
+        drawRectangle(0x00000000, 980+(i*8), 5, 8, 16);
+    }
+    for(int i=0; current[i] != 0; i++) {
+        drawChar(current[i], 0x0000FF00, 0x00000000, 980+(i*8), 5);
+    }
 
     return (void *)nextRSP;
 }
@@ -282,4 +293,12 @@ void my_exit(int64_t retValue) {
         unblockProcess(parent->pid);
     }
     yield();
+}
+
+void getCurrentFDs(int *fds) {
+    if(scheduler == NULL) return;
+    if(scheduler->current == NO_PID) return;
+    process_t *currentProcess = scheduler->processes[scheduler->current];
+    fds[0] = currentProcess->readFd;
+    fds[1] = currentProcess->writeFd;
 }

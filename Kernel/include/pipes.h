@@ -6,7 +6,7 @@
 
 void initPipes();
 int createPipe(int fds[2]);
-int writePipe(int fd, char *buffer, int bytes);
+int writePipe(int fd, const char *buffer, int bytes);
 int readPipe(int fd, char *buffer, int bytes);
 void destroyPipe(int fds[2]);
 

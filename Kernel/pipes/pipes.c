@@ -62,7 +62,7 @@ int createPipe(int fds[2]) {
     return -1;
 }
 
-int writePipe(int fd, char *buffer, int bytes) {
+int writePipe(int fd, const char *buffer, int bytes) {
     if(fd < BUILTIN_FDS || fd >= nextFd) return -1;
     int index = getIndexByFd(fd, 1);
     if (index == -1) return -1;

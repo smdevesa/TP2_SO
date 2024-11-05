@@ -3,6 +3,7 @@
 #include <moduleLoader.h>
 #include <idtLoader.h>
 #include <memory_manager.h>
+#include <keyboardDriver.h>
 #include <scheduler.h>
 #include <semaphore.h>
 #include <pipes.h>
@@ -52,6 +53,7 @@ int main()
     my_mem_init(START_FREE_MEM, MEM_SIZE);
     createScheduler();
     initSemManager();
+    initKeyboardDriver();
     initPipes();
     load_idt();
     return 0;

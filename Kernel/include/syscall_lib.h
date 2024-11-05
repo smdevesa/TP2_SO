@@ -33,7 +33,7 @@ enum registers_idx {
  * @param count: the number of chars to read.
  * @return the number of chars read.
  */
-uint64_t sys_read(int fd, char * buffer, int count);
+int64_t sys_read(int fd, char * buffer, int count);
 
 /**
  * @brief Writes a string to the standard output.
@@ -42,7 +42,7 @@ uint64_t sys_read(int fd, char * buffer, int count);
  * @param color: the color of the string in hexadecimal. Usage: 0x00RRGGBB.
  * @return the number of chars written.
  */
-uint64_t sys_write(int fd, const char * buffer, int count, uint32_t color);
+int64_t sys_write(int fd, const char * buffer, int count, uint32_t color);
 
 /**
  * @brief Draws a rectangle in the screen on the given coordinates.
