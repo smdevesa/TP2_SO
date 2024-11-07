@@ -37,6 +37,6 @@ $(LOADEROBJECT):
 	$(GCC) $(GCCFLAGS) $(LOADERSRC) -c -o $(LOADEROBJECT)
 
 clean:
-	rm -rf asm/*.o clib/*.o eliminator/*.o shell/*.o *.o tests/*.o
+	rm -rf asm/*.o clib/*.o eliminator/*.o shell/*.o *.o tests/*.o philosophers/*.o
 
 .PHONY: all clean print

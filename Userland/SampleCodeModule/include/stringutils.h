@@ -38,4 +38,8 @@ void strncpy(char *dest, const char *src, size_t n);
  */
 void reverse(char *str);
 
+
+//AGREGO TIZIANO
+char * strcat(char *dest, const char *src);
+
 #endif //TPE_ARQ_STRINGUTILS_H

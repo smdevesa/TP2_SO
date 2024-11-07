@@ -2,12 +2,12 @@
 // Created by Tizifuchi12 on 6/11/2024.
 //
 
+//AGREGUE LA FUNCION STRCAT Y SU DECLARACION EN STRINGUTILS
 //LIMITACIONES: 12 FILOSOFOS MAXIMO, NO SE PUEDE ELEGIR QUE FILOSOFO BORRAR NI AGREGAR, SIEMPRE ES EL ULTIMO EN (DES)USO DEL VECTOR
-#include "philosophers.h"
-#include "syscalls.h"
-#include "iolib.h"
-#include "semaphore.h"
-#include "scheduler.h"
+#include <philosophers.h>
+#include <syscalls.h>
+#include <iolib.h>
+#include <stringutils.h>
 
 #define MAX_PHILOSOPHERS 12
 #define MIN_PHILOSOPHERS 3
@@ -26,27 +26,34 @@ typedef enum {
     EATING
 } state_t;
 
-static int cantPhilosophers = 0
-static philosopher_t * philosophers[MAX_PHILOSOPHERS]
+typedef struct {
+    uint16_t pid; //LO GUARDO POR SI LO LLEGO A NECESITAR DESPUES
+    state_t state;
+    char * sem; //VER SI ES CHAR* O SEMAPHORE_T
+} philosopher_t; //aca meto toda la info de ese filosofo, con esto no hace falta que cree los vectores que usa en la teorica
+
+static int cantPhilosophers = 0;
+static philosopher_t * philosophers[MAX_PHILOSOPHERS];
 
 static int addPhilosopher(int i);
 static int deletePhilo(int i );
-static void philoActions(int argc, char * argv[]);
+static uint64_t philoActions(int argc, char * argv[]);
 static void putForks(int i);
 static void takeForks(int i);
 static void showState();
+static void test(int i);
 
 
 
 void philosopherProgram(int argc, char * argv[]) {
 
-    if(semOpen(MUTEX, 1) == -1) { //genero el semaforo general
+    if(_sys_semOpen(MUTEX, 1) == -1) { //genero el semaforo general
         printf("Error opening mutex\n");
         return;
     }
 
     for(int i = 0; i < MAX_PHILOSOPHERS; i++){ //armo el lugar para el maximo posbile
-        philosophers[i] = malloc(sizeof(philosopher_t)); //hacerle el free
+        philosophers[i] = _sys_malloc(sizeof(philosopher_t)); //hacerle el free
         philosophers[i]->state = NONE;
         philosophers[i]->pid = -1; //es que todavia no hay filosofo en esa posicion
     }
@@ -55,7 +62,7 @@ void philosopherProgram(int argc, char * argv[]) {
         addPhilosopher(i);
     }
 
-    char c = '\0';
+    char c;
     while((c = getchar()) != QUIT){
         switch(c){
             case ADD:
@@ -67,18 +74,18 @@ void philosopherProgram(int argc, char * argv[]) {
         }
     }
 
-    printf("problema de los filosofos terminado\n")
+    printf("problema de los filosofos terminado\n");
 
     for(int i = 0; i < MAX_PHILOSOPHERS; i++){ //libero todo
         if(i < cantPhilosophers){
-            semClose(philosophers[i]->sem);
+            _sys_semClose(philosophers[i]->sem);
             _sys_kill(philosophers[i]->pid);
         }
         _sys_free(philosophers[i]);
     }
 
     cantPhilosophers = 0;
-    semClose(MUTEX);
+    _sys_semClose(MUTEX);
 }
 
 static int addPhilosopher(int i){
@@ -90,16 +97,21 @@ static int addPhilosopher(int i){
     _sys_semWait(MUTEX);
     printf("Adding philosopher %d\n", i);
 
+    //REVISAR ESTAS LINEAS DE ABAJO YA ME MAREE
     char philoName[20];
-    sprintf(philoName, "Philosopher %d", cantPhilosophers);
+    char philoNumberBuffer[2];
+    strcpy(philoName, "philosopher ");
+    char* philoNumber = itoa(cantPhilosophers, philoNumberBuffer);
+    strcat(philoName, philoNumber);
 
-    philosophers[i]->sem = semOpen(philoName, 1); //VER ESTE VALOR CUANDO HAGA EL PROGRAMA
+    _sys_semOpen(philoName, 1); //VER ESTE VALOR CUANDO HAGA EL PROGRAMA
+    philosophers[i]->sem = philoName; //los semaforos de cada filosofo tienen el nombre del filosofo
     philosophers[i]->state = THINKING;
 
-    char philoNumber[2];
-    sprintf(philoNumber, "%d", i);
+    /*char philoNumber[2];
+    sprintf(philoNumber, "%d", i);*/
     char * argv[] = {philoNumber, NULL};
-    philosophers[i]->pid = (int16_t) _sys_createProcess(&philoActions, argv, philoName, 1, 0); //VER EL CASTEO QUE TIRE AHI
+    philosophers[i]->pid = (int16_t) _sys_createProcess((mainFunction)&philoActions, argv, philoName, 1, 0); //VER EL CASTEO QUE TIRE AHI
     if(philosophers[i]->pid == -1){
         printf("Error creating philosopher\n");
         return -1;
@@ -126,7 +138,7 @@ static int deletePhilo(int i){
         _sys_semWait(MUTEX); //procedo como si no hubiera entrado al while
     }
 
-    semClose(philosophers[i]->sem);
+    _sys_semClose(philosophers[i]->sem);
     philosophers[i]->state = NONE; //pongo que no hay filosofo
     _sys_kill(philosophers[i]->pid);
     philosophers[i]->pid = -1; //marco como que ya no hay filosofo ahi, para que no quede el pid viejo pero no es necesario para el programa, se piede sacar
@@ -138,15 +150,16 @@ static int deletePhilo(int i){
     return 0;
 }
 
-static void philoActions(int argc, char * argv[]){
+static uint64_t philoActions(int argc, char * argv[]){
     int i = atoi(argv[0]);
 
     while(1){
-        sleep(THINKING); //ver que valor poner aca
+        _sys_sleep(THINKING); //ver que valor poner aca
         takeForks(i);
-        sleep(EATING); //ver que valor poner aca
+        _sys_sleep(EATING); //ver que valor poner aca
         putForks(i);
     }
+    return 0;
 }
 
 
@@ -186,3 +199,4 @@ static void showState(){
             printf("\n");
     }
 }
+

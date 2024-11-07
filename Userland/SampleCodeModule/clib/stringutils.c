@@ -43,3 +43,11 @@ int strcmp(const char *str1, const char *str2) {
     }
     return 0;
 }
+
+//AGREGO TIZIANO PARA USAR EN FILOSOFOS
+char* strcat(char *dest, const char *src) {
+    char *rdest = dest;
+    while (*dest) dest++; // Avanza hasta el final de la cadena de destino
+    while ((*dest++ = *src++)); // Copia la cadena de origen al final de la cadena de destino
+    return rdest; // Devuelve el puntero a la cadena de destino
+}
