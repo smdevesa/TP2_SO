@@ -14,15 +14,22 @@
 #define ERROR_SECONDARY_COLOR 0x00DD5E56
 
 typedef struct command {
-    char * name;
-    char * description;
+    char *name;
+    char *description;
     uint8_t builtin;
     mainFunction function;
 } command_t;
 
+typedef struct executable_command {
+    char *command;
+    char *args[MAX_ARGS + 1];
+    int argc;
+    int fds[2];
+    int pid;
+} executable_command_t;
+
 extern void _invalidOp();
 
-static int createProcessWrapper(mainFunction main, char ** argv, char * name, int fds[]);
 static int helpCommand(int argc, char * argv[]);
 static int clearCommand(int argc, char * argv[]);
 static int exitCommand(int argc, char * argv[]);
@@ -60,24 +67,85 @@ int parseCommand(char *input) {
         return INPUT_ERROR;
     }
 
-    char *args[MAX_ARGS] = {0};
-    char *command = NULL;
-    int argsCount = fillCommandAndArgs(&command, args, input);
-    if (argsCount == INPUT_ERROR) {
-        return INPUT_ERROR;
+    executable_command_t executable_commands[MAX_COMMANDS];
+    for(int i=0; i<MAX_COMMANDS; i++) {
+        executable_commands[i].pid = -1;
     }
 
-    for (int i = 0; i < COMMANDS_COUNT; i++) {
-        if (strcmp(command, commands[i].name) == 0) {
-            if (commands[i].builtin) {
-                return commands[i].function(argsCount, args);
-            } else {
-                int fds[2] = {STDOUT_FD, STDIN_FD};
-                return createProcessWrapper(commands[i].function, args, command, fds);
+    char * pipe_pos = strchr(input, '|');
+    size_t executable_command_count = pipe_pos == NULL ? 1 : 2;
+    if(pipe_pos) {
+        *pipe_pos = 0;
+        if(strchr(pipe_pos + 1, '|')) {
+            printError("pipe", "Only one pipe is allowed.", NULL);
+            return ERROR;
+        }
+    };
+
+    for(int i=0; i<executable_command_count; i++) {
+        executable_commands[i].argc = fillCommandAndArgs(&executable_commands[i].command, executable_commands[i].args, input);
+        if(executable_commands[i].argc == INPUT_ERROR) {
+            return INPUT_ERROR;
+        }
+        if(pipe_pos) input = pipe_pos + 1;
+    }
+
+    if(pipe_pos) {
+        int pipefds[2];
+        if(_sys_create_pipe(pipefds) == -1) {
+            printError("pipe", "Error creating pipe.", NULL);
+            return ERROR;
+        }
+        executable_commands[0].fds[1] = pipefds[1];
+        executable_commands[1].fds[0] = pipefds[0];
+        executable_commands[1].fds[1] = STDOUT_FD;
+        executable_commands[0].fds[0] = STDIN_FD;
+    }
+    else {
+        executable_commands[0].fds[0] = foreground ? STDIN_FD : -1;
+        executable_commands[0].fds[1] = STDOUT_FD;
+    }
+
+    for(int i=0; i<executable_command_count; i++) {
+        uint8_t found = 0;
+        for(int j=0; j<COMMANDS_COUNT; j++) {
+            if(strcmp(executable_commands[i].command, commands[j].name) == 0) {
+                found = 1;
+                if(commands[j].builtin) {
+                    return commands[j].function(executable_commands[i].argc, executable_commands[i].args);
+                }
+                else {
+                    executable_commands[i].pid = _sys_createProcess(commands[j].function, executable_commands[i].args, executable_commands[i].command, 0,executable_commands[i].fds);
+                    if(executable_commands[i].pid == -1) {
+                        return ERROR;
+                    }
+                }
+                break;
             }
         }
+        if(!found) {
+            printError(executable_commands[i].command, "Command not found.", NULL);
+            for(int j=0; j<executable_command_count; j++) {
+                if(executable_commands[j].pid != -1) {
+                    _sys_kill(executable_commands[j].pid);
+                }
+            }
+            return ERROR;
+        }
     }
-    return INPUT_ERROR;
+
+    if(foreground) {
+        for(int i=0; i<executable_command_count; i++) {
+            if(executable_commands[i].pid != -1) {
+                _sys_waitpid(executable_commands[i].pid);
+            }
+        }
+        if(pipe_pos) {
+            _sys_destroy_pipe(executable_commands[0].fds[1]);
+        }
+    }
+
+    return OK;
 }
 
 static int fillCommandAndArgs(char **command, char *args[], char *input) {
@@ -113,18 +181,6 @@ static int fillCommandAndArgs(char **command, char *args[], char *input) {
 
     args[argsCount] = NULL;
     return argsCount;
-}
-
-static int createProcessWrapper(mainFunction main, char ** argv, char * name, int fds[]) {
-    int pid = _sys_createProcess(main, argv, name, 0, fds);
-    if(pid == -1) {
-        printError(name, "Error creating process.", NULL);
-        return ERROR;
-    }
-    if(foreground) {
-        _sys_waitpid(pid);
-    }
-    return OK;
 }
 
 static int helpCommand(int argc, char * argv[]) {

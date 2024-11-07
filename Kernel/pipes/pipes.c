@@ -5,6 +5,7 @@
 
 #define BUILTIN_FDS 2
 #define NAME_SIZE 64
+#define EOF -1
 
 typedef struct pipe {
     char buffer[PIPE_SIZE];
@@ -94,6 +95,19 @@ int readPipe(int fd, char *buffer, int bytes) {
     }
 
     return bytes;
+}
+
+void send_pipe_eof(int fd) {
+    if(fd < BUILTIN_FDS || fd >= nextFd) return;
+    int index = getIndexByFd(fd, 1);
+    if (index == -1) return;
+    pipe_t *pipe = pipes[index];
+
+    semWait(pipe->writeSem);
+    pipe->buffer[pipe->writePos] = EOF;
+    pipe->writePos = (pipe->writePos + 1) % PIPE_SIZE;
+    pipe->size++;
+    semPost(pipe->readSem);
 }
 
 void destroyPipe(int writeFd) {

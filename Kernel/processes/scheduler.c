@@ -5,11 +5,13 @@
 #include <lib.h>
 #include <syscall_lib.h>
 #include <videoDriver.h>
+#include <pipes.h>
 
 extern void _hlt();
 extern void _forceNextProcess();
 
 #define NO_PID -1
+#define STDOUT 1
 
 typedef struct schedulerCDT {
     process_t *processes[MAX_PROCESSES];
@@ -286,8 +288,13 @@ int64_t waitPid(uint32_t pid) {
 void my_exit(int64_t retValue) {
     if(scheduler == NULL) return;
     process_t *currentProcess = scheduler->processes[scheduler->current];
+
+    if(currentProcess->writeFd != STDOUT) {
+        send_pipe_eof(currentProcess->writeFd);
+    }
     currentProcess->status = TERMINATED;
     currentProcess->retValue = retValue;
+
     process_t * parent = scheduler->processes[currentProcess->parentPid];
     if(parent != NULL && parent->status == BLOCKED && parent->waitingForPid == currentProcess->pid) {
         unblockProcess(parent->pid);
