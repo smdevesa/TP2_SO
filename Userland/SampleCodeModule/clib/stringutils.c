@@ -43,3 +43,12 @@ int strcmp(const char *str1, const char *str2) {
     }
     return 0;
 }
+
+char * strchr(const char *str, int c) {
+    for(int i=0; str[i] != 0; i++) {
+        if(str[i] == c) {
+            return (char *) &str[i];
+        }
+    }
+    return NULL;
+}

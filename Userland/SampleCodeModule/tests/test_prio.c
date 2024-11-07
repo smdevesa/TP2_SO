@@ -19,10 +19,12 @@ int64_t prio[TOTAL_PROCESSES] = {LOWEST, MEDIUM_LOW, MEDIUM_HIGH, HIGHEST};
 void test_prio() {
     int64_t pids[TOTAL_PROCESSES];
     char *argv[] = {WAIT_STR, NULL};
+    int fds[2] = {STDIN, STDOUT};
     uint64_t i;
 
     for (i = 0; i < TOTAL_PROCESSES; i++) {
-        pids[i] = my_create_process((mainFunction) &endless_loop_print, argv, "endless_loop_print", LOWEST, 0);
+        pids[i] = my_create_process((mainFunction) &endless_loop_print, argv, "endless_loop_print",
+                                    0, fds);
         if(pids[i] < 0) {
             printf("test_prio: error creating process %d\n", (int)i);
         }

@@ -1,5 +1,8 @@
 #include <keyboardDriver.h>
 #include <syscall_lib.h>
+#include <semaphore.h>
+
+#define KB_SEM_NAME "os_kb_sem"
 
 extern uint8_t _getScancode();
 extern void _updateRegisters();
@@ -53,6 +56,13 @@ static volatile uint64_t registers[REGS_AMOUNT];
 
 static volatile uint8_t registersFilled = 0;
 
+int initKeyboardDriver() {
+    if(semOpen(KB_SEM_NAME, 0) == -1) {
+        return -1;
+    }
+    return 0;
+}
+
 void keyboard_handler() {
     uint8_t scancode = _getScancode();
     updateFlags(scancode);
@@ -63,10 +73,12 @@ void keyboard_handler() {
     }
     else if (ascii != 0) {
         cb_push(ascii);
+        semPost(KB_SEM_NAME);
     }
 }
 
 char kb_getchar() {
+    semWait(KB_SEM_NAME);
     return cb_pop();
 }
 

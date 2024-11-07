@@ -17,11 +17,15 @@ uint64_t test_mm(uint64_t argc, char *argv[]) {
     uint32_t total;
     uint64_t max_memory;
 
-    if (argc != 1)
+    if (argc != 1) {
+        printf("test_mm: ERROR: Invalid number of arguments\n");
         return -1;
+    }
 
-    if ((max_memory = satoi(argv[0])) <= 0)
+    if ((max_memory = satoi(argv[0])) <= 0) {
+        printf("test_mm: ERROR: Invalid argument\n");
         return -1;
+    }
 
     while (1) {
         rq = 0;

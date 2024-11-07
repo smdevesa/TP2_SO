@@ -5,8 +5,8 @@ int64_t my_getpid() {
     return _sys_getpid();
 }
 
-int64_t my_create_process(mainFunction main, char **argv, char *name, uint8_t priority, uint8_t unkillable) {
-    return _sys_createProcess(main, argv, name, priority, unkillable);
+int64_t my_create_process(mainFunction main, char **argv, char *name, uint8_t unkillable, int* fileDescriptors) {
+    return _sys_createProcess(main, argv, name, unkillable, fileDescriptors);
 }
 
 int64_t my_nice(uint64_t pid, uint64_t newPrio) {

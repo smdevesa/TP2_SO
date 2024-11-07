@@ -3,7 +3,7 @@
 
 enum syscalls {READ = 0, WRITE, RECTANGLE, CLEAR, COORDS, SCREENINFO, FONTINFO, GETTIME, SETSCALE,
         GETREGS, SLEEP, PLAYSOUND, YIELD, GETPID, CREATE_PROCESS, KILL_PROCESS, BLOCK, UNBLOCK, CHANGE_PRIORITY,
-        EXIT, MALLOC, FREE, PS, SEM_OPEN, SEM_CLOSE, SEM_WAIT, SEM_POST, WAITPID};
+        EXIT, MALLOC, FREE, PS, SEM_OPEN, SEM_CLOSE, SEM_WAIT, SEM_POST, WAITPID, CREATE_PIPE, DESTROY_PIPE};
 
 uint64_t syscallDispatcher(int64_t rdi, int64_t rsi, int64_t rdx, int64_t rcx, int64_t r8, int64_t rax) {
     // rax contains the syscall id
@@ -22,7 +22,7 @@ uint64_t syscallDispatcher(int64_t rdi, int64_t rsi, int64_t rdx, int64_t rcx, i
         case PLAYSOUND: return sys_playSound(rdi, rsi);
         case YIELD: return sys_yield();
         case GETPID: return sys_getPid();
-        case CREATE_PROCESS: return sys_createProcess(rdi, (char **) rsi, (char *) rdx, (uint8_t) rcx, (uint8_t) r8);
+        case CREATE_PROCESS: return sys_createProcess(rdi, (char **) rsi, (char *) rdx, (uint8_t) rcx, (int *) r8);
         case KILL_PROCESS: return sys_killProcess(rdi);
         case BLOCK: return sys_blockProcess(rdi);
         case UNBLOCK: return sys_unblockProcess(rdi);
@@ -36,6 +36,8 @@ uint64_t syscallDispatcher(int64_t rdi, int64_t rsi, int64_t rdx, int64_t rcx, i
         case SEM_WAIT: return sys_semWait((char *) rdi);
         case SEM_POST: return sys_semPost((char *) rdi);
         case WAITPID: return sys_waitpid(rdi);
+        case CREATE_PIPE: return sys_create_pipe((int *) rdi);
+        case DESTROY_PIPE: return sys_destroy_pipe(rdi);
         default: return 0;
     }
 }

@@ -162,14 +162,14 @@ uint64_t _sys_yield();
 
 /**
  * @brief Creates a new process.
- * @param main: the main function of the process.
- * @param argv: the arguments of the process.
- * @param name: the name of the process.
- * @param priority: the priority of the process.
- * @param unkillable: 1 if the process is unkillable, 0 otherwise.
+ * @param main the main function of the process.
+ * @param argv the arguments of the process.
+ * @param name the name of the process.
+ * @param unkillable if the process is unkillable.
+ * @param fileDescriptors the file descriptors of the process. The first element is the input file descriptor and the second element is the output file descriptor.
  * @return the PID of the new process.
  */
-int64_t _sys_createProcess(mainFunction main, char **argv, char *name, uint8_t priority, uint8_t unkillable);
+int64_t _sys_createProcess(mainFunction main, char **argv, char *name, uint8_t unkillable, int *fileDescriptors);
 
 /**
  * @brief Kills a process.
@@ -262,6 +262,18 @@ int64_t _sys_semPost(char * name);
  */
 int64_t _sys_waitpid(uint32_t pid);
 
+/**
+ * @brief Creates a pipe.
+ * @param fds the file descriptors of the pipe.
+ * @return 0 if the pipe was created successfully, -1 otherwise.
+ */
+int64_t _sys_create_pipe(int fds[2]);
 
+/**
+ * @brief Destroys a pipe.
+ * @param writeFd the write file descriptor of the pipe.
+ * @return 0 if the pipe was destroyed successfully, -1 otherwise.
+ */
+int64_t _sys_destroy_pipe(int writeFd);
 
 #endif

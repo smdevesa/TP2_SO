@@ -22,15 +22,23 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
     int8_t inc;
     int8_t use_sem;
 
-    if (argc != 3)
+    if (argc != 3) {
+        printf("test_sync: ERROR: Invalid number of arguments\n");
         return -1;
+    }
 
-    if ((n = satoi(argv[0])) <= 0)
+    if ((n = satoi(argv[0])) <= 0) {
+        printf("test_sync: ERROR: Invalid argument\n");
         return -1;
-    if ((inc = satoi(argv[1])) == 0)
+    }
+    if ((inc = satoi(argv[1])) == 0) {
+        printf("test_sync: ERROR: Invalid argument\n");
         return -1;
-    if ((use_sem = satoi(argv[2])) < 0)
+    }
+    if ((use_sem = satoi(argv[2])) < 0) {
+        printf("test_sync: ERROR: Invalid argument\n");
         return -1;
+    }
 
     if (use_sem)
         if (my_sem_open(SEM_ID, 1) == -1) {
@@ -59,18 +67,23 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
 uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
     uint64_t pids[2 * TOTAL_PAIR_PROCESSES];
 
-    if (argc != 2)
+    if (argc != 2) {
+        printf("test_sync: ERROR: Invalid number of arguments\n");
         return -1;
+    }
 
     char *argvDec[] = {argv[0], "-1", argv[1], NULL};
     char *argvInc[] = {argv[0], "1", argv[1], NULL};
+    int fds[2] = {STDIN, STDOUT};
 
     global = 0;
 
     uint64_t i;
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-        pids[i] = my_create_process((mainFunction) &my_process_inc, argvDec, "my_process_dec", 1, 0);
-        pids[i + TOTAL_PAIR_PROCESSES] = my_create_process((mainFunction) &my_process_inc, argvInc, "my_process_inc", 1, 0);
+        pids[i] = my_create_process((mainFunction) &my_process_inc, argvDec, "my_process_dec",
+                                    0, fds);
+        pids[i + TOTAL_PAIR_PROCESSES] = my_create_process((mainFunction) &my_process_inc, argvInc, "my_process_inc",
+                                                           0, fds);
     }
 
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {

@@ -5,6 +5,7 @@
 
 #define MAX_COMMAND_SIZE 128
 #define MAX_ARGS 5
+#define MAX_COMMANDS 2
 
 #define INPUT_ERROR -1
 #define OK 0

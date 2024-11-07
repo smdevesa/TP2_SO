@@ -18,12 +18,17 @@ int64_t test_processes(int argc, char *argv[]) {
     uint8_t action;
     uint64_t max_processes;
     char *argvAux[] = {0, NULL};
+    int fds[2] = {STDIN, STDOUT};
 
-    if (argc != 1)
+    if (argc != 1) {
+        printf("test_processes: ERROR: Invalid number of arguments\n");
         return -1;
+    }
 
-    if ((max_processes = satoi(argv[0])) <= 0)
+    if ((max_processes = satoi(argv[0])) <= 0) {
+        printf("test_processes: ERROR: Invalid argument\n");
         return -1;
+    }
 
     p_rq p_rqs[max_processes];
     int count = 0;
@@ -32,7 +37,8 @@ int64_t test_processes(int argc, char *argv[]) {
 
         // Create max_processes processes
         for (rq = 0; rq < max_processes; rq++) {
-            p_rqs[rq].pid = my_create_process((mainFunction)&endless_loop, argvAux, "endless_loop", 1, 0);
+            p_rqs[rq].pid = my_create_process((mainFunction)&endless_loop, argvAux, "endless_loop",
+                                              0, fds);
             if (p_rqs[rq].pid == -1) {
                 printf("test_processes: ERROR creating process, it: %d\n", count);
                 return -1;
