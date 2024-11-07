@@ -36,9 +36,7 @@ static int exitCommand(int argc, char * argv[]);
 static int inforegCommand(int argc, char * argv[]);
 static int fillCommandAndArgs(char ** command, char * args[], char * input);
 static void printError(char * command, char * message, char * usage);
-static int psCommand(int argc, char * argv[]);
 static int killCommand(int argc, char * argv[]);
-static void printPsHeader();
 
 static command_t commands[] = {
         {"help", "Shows the available commands.", 1, &helpCommand},
@@ -48,7 +46,7 @@ static command_t commands[] = {
         {"tmm", "Tests memory manager.", 0, (mainFunction)&test_mm},
         {"ts", "Tests the scheduler.", 0, (mainFunction)&test_processes},
         {"tp", "Tests priority.", 0, (mainFunction)&test_prio},
-        {"ps", "Shows the process list.", 1, &psCommand},
+        {"ps", "Shows the process list.", 0, (mainFunction)&ps},
         {"kill", "Kills a process. Usage: kill [pid]", 1, &killCommand},
         {"tsy", "Tests the synchronization primitives. Usage: tsy [n] [use_sem]", 0, (mainFunction)&test_sync},
         {"cat", "Prints stdin as received.", 0, (mainFunction)&cat}
@@ -229,29 +227,6 @@ static void printError(char * command, char * message, char * usage) {
         printf("\nUsage: %s\n", usage);
     else
         putchar('\n');
-}
-
-static void printPsHeader() {
-    printStringColor("PID; NAME; PARENT; PRIORITY; UNKILLABLE; STATUS; STACK_BASE\n", COMMAND_SECONDARY_COLOR);
-}
-
-static int psCommand(int argc, char * argv[]) {
-    processInfo_t * processList = _sys_ps();
-    char * statusString[] = {"READY", "BLOCKED", "RUNNING", "TERMINATED"};
-    processInfo_t * current = processList;
-    printPsHeader();
-    while(current->pid != -1) {
-        printf("%d; %s; %d; %d; %d; %s; %x\n",
-               current->pid,
-               current->name,
-               current->parent,
-               current->priority,
-               current->unkillable,
-               statusString[current->status],
-               (uint64_t)current->stackBase);
-        current++;
-    }
-    return OK;
 }
 
 static int killCommand(int argc, char * argv[]) {
