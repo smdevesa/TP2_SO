@@ -12,4 +12,7 @@ void shell();
  */
 void setUsername(char * username);
 
+
+int noScreenSpace();
+
 #endif //TPE_ARQ_SHELL_H

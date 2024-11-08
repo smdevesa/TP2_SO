@@ -23,7 +23,6 @@
 static void printUser();
 static void getInputAndPrint(char * input);
 static void printCursor(uint32_t hexColor, size_t offsetX);
-static int noScreenSpace();
 
 static char * username;
 
@@ -128,6 +127,6 @@ static void printCursor(uint32_t hexColor, size_t offsetX) {
     drawRectangle(hexColor, x, y, getFontWidth(), getFontHeight());
 }
 
-static int noScreenSpace() {
+/*static*/ int noScreenSpace() {
     return (getCursorY() + getFontHeight()) > getScreenHeight();
 }
