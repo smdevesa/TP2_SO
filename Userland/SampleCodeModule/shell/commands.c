@@ -4,6 +4,7 @@
 #include <time.h>
 #include <syscalls.h>
 #include <eliminator.h>
+#include <philosophers.h>
 #include <test_util.h>
 
 #define HELP_IDX 0
@@ -39,6 +40,7 @@ static int killCommand(int argc, char * argv[]);
 static int testMemoryManagerCommand(int argc, char * argv[]);
 static void printPsHeader();
 static int testSyncCommand(int argc, char * argv[]);
+static int phyloCommand(int argc, char * argv[]);
 
 static command_t commands[] = {
         {"help", "Shows the available commands.", 1, &helpCommand},
@@ -54,7 +56,8 @@ static command_t commands[] = {
         {"tp", "Tests priority.", 0, &testPriorityCommand},
         {"ps", "Shows the process list.", 1, &psCommand},
         {"kill", "Kills a process. Usage: kill [pid]", 1, &killCommand},
-        {"tsy", "Tests the synchronization primitives. Usage: tsy [n] [use_sem]", 0, &testSyncCommand}
+        {"tsy", "Tests the synchronization primitives. Usage: tsy [n] [use_sem]", 0, &testSyncCommand},
+        {"phylo", "Starts the philosophers program.", 0, &phyloCommand}
 };
 
 #define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))
@@ -336,4 +339,9 @@ static int testSyncCommand(int argc, char * argv[]) {
         return -1;
     }
     return pid;
+}
+
+static int phyloCommand(int argc, char * argv[]) {
+    philosopherProgram(argc, argv);
+    return OK;
 }

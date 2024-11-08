@@ -125,6 +125,7 @@ static int addPhilosopher(int i){
 }
 
 //NO LIBERO EL ESPACIO DEL FILOSOFO PORQUE DESPPUES DE BORRAR PUEDO LLEGAR A QUERER HACER ADD
+
 static int deletePhilo(int i){
     if(cantPhilosophers == MIN_PHILOSOPHERS){
         printf("Min philosophers reached\n");
@@ -190,13 +191,16 @@ static void test(int i){
 }
 
 static void showState(){
-    for(int i = 0; i < cantPhilosophers; i++){
-        if(philosophers[i]->state == EATING)
-            printf("E ");
-        else if(philosophers[i]->state == THINKING || philosophers[i]->state == HUNGRY)
-            printf(". ");
-        else
-            printf("\n");
+
+    static void showState() {
+        for (int i = 0; i < cantPhilosophers; i++) {
+            if (philosophers[i]->state == EATING)
+                printf("E ");
+            else if (philosophers[i]->state == THINKING || philosophers[i]->state == HUNGRY)
+                printf(". ");
+        }
+        printf("\n");  // Añade una nueva línea después de imprimir todos los filósofos
     }
+
 }
 
