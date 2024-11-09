@@ -40,5 +40,6 @@ processInfo_t * ps();
 void my_exit(int64_t retValue);
 int64_t waitPid(uint32_t pid);
 void getCurrentFDs(int *fds);
+int block_process_sleep(uint16_t pid, uint8_t sleep);
 
 #endif //TP2_SO_SCHEDULER_H

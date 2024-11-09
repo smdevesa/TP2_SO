@@ -47,11 +47,20 @@ char * fgets(char *buffer, size_t size) {
 
 int atoi(const char *str) {
     int res = 0;
-    for (int i = 0; str[i] != 0 && str[i] <= '9' && str[i] >= '0'; i++) {
-        res = res * 10 + str[i] - '0';
+    int sign = 1;
+
+    if (str[0] == '-') {
+        sign = -1;
+        str++;
     }
-    return res;
+
+    for (int i = 0; str[i] != 0 && str[i] <= '9' && str[i] >= '0'; i++) {
+        res = res * 10 + (str[i] - '0');
+    }
+
+    return res * sign;
 }
+
 
 char *itoa(int num, char *str) {
     int i = 0;

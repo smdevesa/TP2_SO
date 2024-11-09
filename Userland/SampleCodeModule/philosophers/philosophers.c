@@ -1,19 +1,16 @@
-//
-// Created by Tizifuchi12 on 6/11/2024.
-//
-
-//AGREGUE LA FUNCION STRCAT Y SU DECLARACION EN STRINGUTILS
-//LIMITACIONES: 30 FILOSOFOS MAXIMO (porque admitimos 32 procesos), NO SE PUEDE ELEGIR QUE FILOSOFO BORRAR NI AGREGAR, SIEMPRE ES EL ULTIMO EN (DES)USO DEL VECTOR
-
 #include <syscalls.h>
 #include <iolib.h>
 #include <stringutils.h>
 #include <philosophers.h>
 #include <shell.h>
 
+
+#define STDIN 0
+#define STDOUT 1
 #define MAX_PHILOSOPHERS 15
+#define THINKING_TICKS 1000
 #define MIN_PHILOSOPHERS 3
-#define MUTEX "philoMutex"
+#define MUTEX "philo_mutex_id"
 #define LEFT(i) ((i + numbPhilosophers - 1) % numbPhilosophers)
 #define RIGHT(i) ((i + 1) % numbPhilosophers)
 
@@ -64,9 +61,7 @@ void philosopherProgram(int argc, char * argv[]) {
     }
 
     instructions();
-
-    char x;
-    while((x = getchar()) != START);
+    while(getchar() != START);
 
 
     for(int i = 0; i < MIN_PHILOSOPHERS; i++){
@@ -92,7 +87,7 @@ void philosopherProgram(int argc, char * argv[]) {
 
     printf("Problema de los filosofos terminado\n");
 
-    for(int i = 0; i < MAX_PHILOSOPHERS; i++){ //libero todo
+    for(int i = 0; i < MAX_PHILOSOPHERS; i++){
         if(i < numbPhilosophers){
             _sys_semClose(philosophers[i].semName);
             _sys_kill(philosophers[i].pid);
@@ -105,7 +100,6 @@ void philosopherProgram(int argc, char * argv[]) {
 
 static int addPhilosopher(int i){
     if(numbPhilosophers == MAX_PHILOSOPHERS){
-        //printf("Max philosophers reached\n");
         printStringColor("Max philosophers reached\n", RED_COLOR);
         return -1;
     }
@@ -122,11 +116,12 @@ static int addPhilosopher(int i){
     strcat(philoName, philoNumber);
 
     _sys_semOpen(philoName, 1);
-    philosophers[i].semName = philoName; //los semaforos de cada filosofo tienen el nombre del filosofo
+    philosophers[i].semName = philoName;
     philosophers[i].state = THINKING;
 
     char * argv[] = {philoNumber, NULL};
-    philosophers[i].pid = (short) _sys_createProcess((mainFunction)&philoActions, argv, philoName, 1, 0);
+    int aux_fd[] = {STDIN, STDOUT};
+    philosophers[i].pid = (short) _sys_createProcess((mainFunction)&philoActions, argv, philoName, 0, aux_fd);
     if(philosophers[i].pid == -1){
         printStringColor("Error creating philosopher\n", RED_COLOR);
         return -1;
@@ -172,10 +167,10 @@ static void philoActions(int argc, char * argv[]){
     int i = atoi(argv[0]);
 
     while(1){
-        _sys_sleep(THINKING); //ver que valor poner aca
+        _sys_sleep(THINKING_TICKS); //ver que valor poner aca
         takeForks(i);
         if(philosophers[i].state == EATING) { //IF DE BALBOA, HACE QUE NINGUN SE MUERA DE HAMBRE PERO HAY PATRON TODAVIA
-            _sys_sleep(EATING); //ver que valor poner aca
+            _sys_sleep(THINKING_TICKS); //ver que valor poner aca
             putForks(i);
         }
     }
@@ -205,6 +200,7 @@ static void test(int i){
         philosophers[i].state = EATING;
         _sys_semPost(philosophers[i].semName);
         showState();
+        _sys_sleep(THINKING_TICKS); //ver que valor poner aca
     }
 }
 

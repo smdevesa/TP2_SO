@@ -151,16 +151,8 @@ uint64_t sys_getRegisters(uint64_t * r) {
     return getRegisters(r);
 }
 
-uint64_t sys_sleep(uint64_t millis) {
-    unsigned long long initial_time = ms_elapsed();
-    unsigned long long currentTime = initial_time;
-    // Activate interrupts
-    _sti();
-    while ((currentTime - initial_time) <= millis) {
-        currentTime = ms_elapsed();
-    }
-    // Deactivate interrupts
-    _cli();
+uint64_t sys_sleep(uint64_t ticks) {
+    sleep(ticks);
     return 1;
 }
 

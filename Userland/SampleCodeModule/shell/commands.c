@@ -38,7 +38,6 @@ static int inforegCommand(int argc, char * argv[]);
 static int fillCommandAndArgs(char ** command, char * args[], char * input);
 static void printError(char * command, char * message, char * usage);
 static int killCommand(int argc, char * argv[]);
-static int phyloCommand(int argc, char * argv[]);
 
 
 static command_t commands[] = {
@@ -51,9 +50,10 @@ static command_t commands[] = {
         {"tp", "Tests priority.", 0, (mainFunction)&test_prio},
         {"ps", "Shows the process list.", 0, (mainFunction)&ps},
         {"kill", "Kills a process. Usage: kill [pid]", 1, &killCommand},
-        {"phylo", "Starts the philosophers program.", 0, &phyloCommand},
+        {"phylo", "Starts the philosophers program.", 0, (mainFunction)&philosopherProgram},
         {"tsy", "Tests the synchronization primitives. Usage: tsy [n] [use_sem]", 0, (mainFunction)&test_sync},
-        {"cat", "Prints stdin as received.", 0, (mainFunction)&cat}
+        {"cat", "Prints stdin as received.", 0, (mainFunction)&cat},
+        {"loop", "Prints its PID every certain number of ticks. Usage: loop [ticks]", 0, (mainFunction)&loop}
 };
 
 #define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))
@@ -246,9 +246,3 @@ static int killCommand(int argc, char * argv[]) {
     }
     return OK;
 }
-
-static int phyloCommand(int argc, char * argv[]) {
-    philosopherProgram(argc, argv);
-    return OK;
-}
-

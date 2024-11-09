@@ -3,6 +3,7 @@
 GLOBAL acquire
 GLOBAL release
 
+section .text
 ; void acquire(lock_t *lock)
 acquire:
     mov al, 0

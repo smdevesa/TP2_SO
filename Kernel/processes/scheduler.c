@@ -6,6 +6,7 @@
 #include <syscall_lib.h>
 #include <videoDriver.h>
 #include <pipes.h>
+#include <time.h>
 
 extern void _hlt();
 extern void _forceNextProcess();
@@ -179,6 +180,7 @@ int32_t killProcess(uint16_t pid) {
         unblockProcess(parent->pid);
     }
     uint8_t contextSwitch = scheduler->processes[pid]->status == RUNNING;
+    remove_sleeping_process(pid);
     removeProcess(pid);
 
     if(contextSwitch){
@@ -188,20 +190,26 @@ int32_t killProcess(uint16_t pid) {
     return 0;
 }
 
-int blockProcess(uint16_t pid){
+int block_process_sleep(uint16_t pid, uint8_t sleep) {
     if(pid == 0) return -1;
     if(scheduler == NULL) return -1;
     if(pid >= MAX_PROCESSES) return -1;
     if(scheduler->processes[pid] == NULL) return -1;
     if(scheduler->processes[pid]->status == TERMINATED) return -1;
 
+    if(!sleep) remove_sleeping_process(pid);
+
     uint8_t contextSwitch = pid == scheduler->current;
     scheduler->processes[pid]->status = BLOCKED;
 
     if(contextSwitch){
-       yield();
+        yield();
     }
     return 0;
+}
+
+int blockProcess(uint16_t pid) {
+    return block_process_sleep(pid, 0);
 }
 
 int unblockProcess(uint16_t pid){
@@ -209,6 +217,8 @@ int unblockProcess(uint16_t pid){
     if(pid >= MAX_PROCESSES) return -1;
     if(scheduler->processes[pid] == NULL) return -1;
     if(scheduler->processes[pid]->status != BLOCKED) return -1;
+
+    remove_sleeping_process(pid);
 
     scheduler->processes[pid]->status = READY;
     return 0;
@@ -294,6 +304,7 @@ void my_exit(int64_t retValue) {
     }
     currentProcess->status = TERMINATED;
     currentProcess->retValue = retValue;
+    remove_sleeping_process(currentProcess->pid);
 
     process_t * parent = scheduler->processes[currentProcess->parentPid];
     if(parent != NULL && parent->status == BLOCKED && parent->waitingForPid == currentProcess->pid) {

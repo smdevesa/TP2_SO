@@ -7,6 +7,7 @@
 #include <scheduler.h>
 #include <semaphore.h>
 #include <pipes.h>
+#include <time.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -51,6 +52,7 @@ void * initializeKernelBinary()
 int main()
 {
     my_mem_init(START_FREE_MEM, MEM_SIZE);
+    init_sleeping_processes();
     createScheduler();
     initSemManager();
     initKeyboardDriver();

@@ -1,6 +1,7 @@
 #include <programs.h>
 #include <iolib.h>
 #include <syscalls.h>
+#include <shell.h>
 
 #define EOF -1
 #define PS_SECONDARY_COLOR 0x00F5ED51
@@ -43,6 +44,26 @@ int ps(int argc, char **argv) {
         current++;
     }
     return 0;
+}
+
+int loop(int argc, char **argv) {
+    if(argc != 1) {
+        printf("loop: Invalid amount of arguments. Usage: loop [ticks]\n");
+        return -1;
+    }
+    int pid = _sys_getpid();
+    int ticks = atoi(argv[0]);
+    if(ticks < 0) {
+        printf("loop: Invalid argument. Ticks must be a positive integer.\n");
+        return -1;
+    }
+    while(1) {
+        if(noScreenSpace()) {
+            clearScreen();
+        }
+        printf("%d ", pid);
+        _sys_sleep(ticks);
+    }
 }
 
 static void print_ps_header() {

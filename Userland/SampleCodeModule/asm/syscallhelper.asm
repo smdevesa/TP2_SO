@@ -1,4 +1,4 @@
-GLOBAL _sys_write,
+GLOBAL _sys_write
 GLOBAL _sys_read
 GLOBAL _sys_drawRectangle
 GLOBAL _sys_clearScreen
