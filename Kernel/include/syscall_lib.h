@@ -4,6 +4,8 @@
 #include <stdint.h>
 
 #define REGS_AMOUNT 17
+#define STDIN 0
+#define STDOUT 1
 
 enum registers_idx {
     RAX_IDX = 0,
@@ -31,7 +33,7 @@ enum registers_idx {
  * @param count: the number of chars to read.
  * @return the number of chars read.
  */
-uint64_t sys_read(int fd, char * buffer, int count);
+int64_t sys_read(int fd, char * buffer, int count);
 
 /**
  * @brief Writes a string to the standard output.
@@ -40,7 +42,7 @@ uint64_t sys_read(int fd, char * buffer, int count);
  * @param color: the color of the string in hexadecimal. Usage: 0x00RRGGBB.
  * @return the number of chars written.
  */
-uint64_t sys_write(int fd, const char * buffer, int count, uint32_t color);
+int64_t sys_write(int fd, const char * buffer, int count, uint32_t color);
 
 /**
  * @brief Draws a rectangle in the screen on the given coordinates.
@@ -130,14 +132,14 @@ uint64_t sys_getPid();
 
 /**
  * @brief Creates a new process.
- * @param main: the main function of the process.
- * @param argv: the arguments of the process.
- * @param name: the name of the process.
- * @param priority: the priority of the process.
- * @param unkillable: 1 if the process is unkillable, 0 otherwise.
- * @return the PID of the new process.
+ * @param main the main function of the process.
+ * @param argv the arguments of the process.
+ * @param name the name of the process.
+ * @param unkillable if the process is unkillable.
+ * @param fileDescriptors the file descriptors of the process. On index 0 is the input file descriptor and on index 1 is the output file descriptor.
+ * @return
  */
-int64_t sys_createProcess(uint64_t main, char **argv, char *name, uint8_t priority, uint8_t unkillable);
+int64_t sys_createProcess(uint64_t main, char **argv, char *name, uint8_t unkillable, int *fileDescriptors);
 
 /**
  * @brief Blocks the process with the given PID.
@@ -228,5 +230,18 @@ int64_t sys_semPost(char * name);
  * @return the return value of the process.
  */
 int64_t sys_waitpid(uint16_t pid);
+
+/**
+ * @brief Creates a new pipe.
+ * @param fds the file descriptors of the pipe.
+ * @return 0 if the pipe was created successfully, -1 if the pipe was not created.
+ */
+int64_t sys_create_pipe(int fds[2]);
+
+/**
+ * @brief Destroys a pipe.
+ * @param writeFd the write file descriptor of the pipe.
+ */
+int64_t sys_destroy_pipe(int writeFd);
 
 #endif

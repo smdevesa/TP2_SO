@@ -27,6 +27,8 @@ GLOBAL _sys_semClose
 GLOBAL _sys_semWait
 GLOBAL _sys_semPost
 GLOBAL _sys_waitpid
+GLOBAL _sys_create_pipe
+GLOBAL _sys_destroy_pipe
 
 section .text
 
@@ -64,3 +66,5 @@ _sys_semClose: syscall 0x18
 _sys_semWait: syscall 0x19
 _sys_semPost: syscall 0x1A
 _sys_waitpid: syscall 0x1B
+_sys_create_pipe: syscall 0x1C
+_sys_destroy_pipe: syscall 0x1D

@@ -15,6 +15,8 @@
 #define RELEASE_OFFSET 0x80
 #define KEYS_AMOUNT 59
 
+int initKeyboardDriver();
+
 /**
  * @brief Hardware interrupt handler for the keyboard.
  *

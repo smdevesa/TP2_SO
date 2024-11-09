@@ -3,11 +3,15 @@
 #include <memoryPositions.h>
 #include <stddef.h>
 #include <lib.h>
+#include <syscall_lib.h>
+#include <videoDriver.h>
+#include <pipes.h>
 
 extern void _hlt();
 extern void _forceNextProcess();
 
 #define NO_PID -1
+#define STDOUT 1
 
 typedef struct schedulerCDT {
     process_t *processes[MAX_PROCESSES];
@@ -27,8 +31,9 @@ static void removeProcess(uint16_t pid);
 
 static int initProcessMain(int argc, char **argv) {
     char ** args = {NULL};
-    addProcess((mainFunction)SHELL_ADDRESS, args, "shell",
-               1, 0);
+    int fds[2] = {STDIN, STDOUT};
+    int pid = addProcess((mainFunction)SHELL_ADDRESS, args, "shell",0, fds);
+    changePriority(pid, MAX_PRIORITY);
 
     while(1) {
         for(int i=0; i<MAX_PROCESSES; i++) {
@@ -53,7 +58,8 @@ schedulerADT createScheduler() {
     scheduler->current = NO_PID;
 
     char *argv[] = {NULL};
-    addProcess((mainFunction)&initProcessMain, argv, "init", MIN_PRIORITY, 1);
+    int fds[2] = {STDIN, STDOUT};
+    addProcess((mainFunction)&initProcessMain, argv, "init", 1, fds);
     return scheduler;
 }
 
@@ -114,15 +120,24 @@ void * schedule(void *prevRSP) {
     uint64_t nextRSP = (uint64_t)nextProcess->stackPos;
     nextProcess->status = RUNNING;
 
+    char current[10];
+    itoa(nextProcess->pid, current);
+    for(int i=0; i<10; i++) {
+        drawRectangle(0x00000000, 980+(i*8), 5, 8, 16);
+    }
+    for(int i=0; current[i] != 0; i++) {
+        drawChar(current[i], 0x0000FF00, 0x00000000, 980+(i*8), 5);
+    }
+
     return (void *)nextRSP;
 }
 
 
 
-int64_t addProcess(mainFunction main, char **argv, char *name, uint8_t priority, uint8_t unkillable) {
+int64_t addProcess(mainFunction main, char **argv, char *name, uint8_t unkillable, int* fileDescriptors) {
     if(scheduler == NULL) return NO_PID;
     if(scheduler->processCount >= MAX_PROCESSES) return NO_PID;
-    if(priority < MIN_PRIORITY || priority > MAX_PRIORITY) return NO_PID;
+    if(fileDescriptors == NULL) return NO_PID;
 
     uint16_t newPid;
     for(newPid = 0; newPid < MAX_PROCESSES; newPid++) {
@@ -130,7 +145,9 @@ int64_t addProcess(mainFunction main, char **argv, char *name, uint8_t priority,
     }
     uint16_t parentPid = (scheduler->current != NO_PID) ? scheduler->current : NO_PID;
 
-    process_t *newProcess = createProcessStructure(newPid, parentPid, NO_PID, main, argv, name, priority, unkillable);
+    process_t *newProcess = createProcessStructure(newPid, parentPid, NO_PID, main,
+                                                   argv, name, MIN_PRIORITY, unkillable,
+                                                   fileDescriptors[1], fileDescriptors[0]);
     if (newProcess == NULL) return NO_PID;
 
     scheduler->processes[newPid] = newProcess;
@@ -271,11 +288,24 @@ int64_t waitPid(uint32_t pid) {
 void my_exit(int64_t retValue) {
     if(scheduler == NULL) return;
     process_t *currentProcess = scheduler->processes[scheduler->current];
+
+    if(currentProcess->writeFd != STDOUT) {
+        send_pipe_eof(currentProcess->writeFd);
+    }
     currentProcess->status = TERMINATED;
     currentProcess->retValue = retValue;
+
     process_t * parent = scheduler->processes[currentProcess->parentPid];
     if(parent != NULL && parent->status == BLOCKED && parent->waitingForPid == currentProcess->pid) {
         unblockProcess(parent->pid);
     }
     yield();
+}
+
+void getCurrentFDs(int *fds) {
+    if(scheduler == NULL) return;
+    if(scheduler->current == NO_PID) return;
+    process_t *currentProcess = scheduler->processes[scheduler->current];
+    fds[0] = currentProcess->readFd;
+    fds[1] = currentProcess->writeFd;
 }

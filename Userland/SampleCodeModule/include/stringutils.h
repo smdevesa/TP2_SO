@@ -38,8 +38,14 @@ void strncpy(char *dest, const char *src, size_t n);
  */
 void reverse(char *str);
 
-
-//AGREGO TIZIANO
 char * strcat(char *dest, const char *src);
+
+/**
+ * @brief Returns a pointer to the first occurrence of the character c in the string str.
+ * @param str
+ * @param c
+ * @return A pointer to the first occurrence of the character c in the string str, or NULL if the character is not found.
+ */
+char * strchr(const char *str, int c);
 
 #endif //TPE_ARQ_STRINGUTILS_H
