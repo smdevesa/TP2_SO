@@ -37,4 +37,6 @@ char kb_getchar();
  */
 uint64_t getRegisters(uint64_t * r);
 
+void release_stdin();
+
 #endif

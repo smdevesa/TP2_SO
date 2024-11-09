@@ -5,6 +5,7 @@
 #include <lib.h>
 #include <syscall_lib.h>
 #include <videoDriver.h>
+#include <keyboardDriver.h>
 #include <pipes.h>
 #include <time.h>
 
@@ -13,6 +14,7 @@ extern void _forceNextProcess();
 
 #define NO_PID -1
 #define STDOUT 1
+#define SHELL_PID 1
 
 typedef struct schedulerCDT {
     process_t *processes[MAX_PROCESSES];
@@ -33,7 +35,7 @@ static void removeProcess(uint16_t pid);
 static int initProcessMain(int argc, char **argv) {
     char ** args = {NULL};
     int fds[2] = {STDIN, STDOUT};
-    int pid = addProcess((mainFunction)SHELL_ADDRESS, args, "shell",0, fds);
+    int pid = addProcess((mainFunction)SHELL_ADDRESS, args, "shell",1, fds);
     changePriority(pid, MAX_PRIORITY);
 
     while(1) {
@@ -150,6 +152,7 @@ int64_t addProcess(mainFunction main, char **argv, char *name, uint8_t unkillabl
                                                    argv, name, MIN_PRIORITY, unkillable,
                                                    fileDescriptors[1], fileDescriptors[0]);
     if (newProcess == NULL) return NO_PID;
+    newProcess->waiting_for_stdin = 0;
 
     scheduler->processes[newPid] = newProcess;
     scheduler->processCount++;
@@ -181,6 +184,12 @@ int32_t killProcess(uint16_t pid) {
     }
     uint8_t contextSwitch = scheduler->processes[pid]->status == RUNNING;
     remove_sleeping_process(pid);
+    if(process->writeFd != STDOUT) {
+        send_pipe_eof(process->writeFd);
+    }
+    if(process->waiting_for_stdin) {
+        release_stdin();
+    }
     removeProcess(pid);
 
     if(contextSwitch){
@@ -319,4 +328,21 @@ void getCurrentFDs(int *fds) {
     process_t *currentProcess = scheduler->processes[scheduler->current];
     fds[0] = currentProcess->readFd;
     fds[1] = currentProcess->writeFd;
+}
+
+void kill_process_in_foreground() {
+    if(scheduler == NULL) return;
+    for(int i=0; i<MAX_PROCESSES; i++) {
+        if(scheduler->processes[i] != NULL &&
+        scheduler->processes[SHELL_PID]->waitingForPid == i) {
+            killProcess(i);
+            return;
+        }
+    }
+}
+
+void update_stdin_waiting(uint8_t value) {
+    if(scheduler == NULL) return;
+    if(scheduler->current == NO_PID) return;
+    scheduler->processes[scheduler->current]->waiting_for_stdin = value;
 }

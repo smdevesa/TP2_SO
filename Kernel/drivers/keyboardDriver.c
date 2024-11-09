@@ -1,6 +1,7 @@
 #include <keyboardDriver.h>
 #include <syscall_lib.h>
 #include <semaphore.h>
+#include <scheduler.h>
 
 #define KB_SEM_NAME "os_kb_sem"
 #define EOF -1
@@ -81,6 +82,7 @@ void keyboard_handler() {
         }
         else if(ascii == 'c' || ascii == 'C') {
             sys_write(1, "^C", 2, 0x00FFFFFF);
+            kill_process_in_foreground();
         }
     }
     else if (ascii != 0) {
@@ -90,7 +92,9 @@ void keyboard_handler() {
 }
 
 char kb_getchar() {
+    update_stdin_waiting(1);
     semWait(KB_SEM_NAME);
+    update_stdin_waiting(0);
     return cb_pop();
 }
 
@@ -180,3 +184,6 @@ static void send_eof_to_stdin() {
     semPost(KB_SEM_NAME);
 }
 
+void release_stdin() {
+    semPost(KB_SEM_NAME);
+}

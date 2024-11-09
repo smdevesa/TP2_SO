@@ -30,6 +30,7 @@ typedef struct process {
     uint16_t writeFd;
     uint16_t readFd;
     int32_t retValue;
+    uint8_t waiting_for_stdin;
 } process_t;
 
 process_t * createProcessStructure(uint16_t pid, uint16_t parentPid, uint16_t waitingForPid, mainFunction main,
