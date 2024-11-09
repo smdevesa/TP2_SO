@@ -7,6 +7,7 @@
 #define PS_SECONDARY_COLOR 0x00F5ED51
 
 static void print_ps_header();
+static uint8_t is_vowel_or_line_break(char c);
 
 int cat(int argc, char **argv) {
     if(argc != 0) {
@@ -64,6 +65,43 @@ int loop(int argc, char **argv) {
         printf("%d ", pid);
         _sys_sleep(ticks);
     }
+}
+
+int filter(int argc, char **argv) {
+    if(argc != 0) {
+        printf("filter: Invalid amount of arguments.\n");
+        return -1;
+    }
+
+    char c;
+    while((c = getchar()) != EOF) {
+        if(is_vowel_or_line_break(c)) putchar(c);
+    }
+
+    return 0;
+}
+
+int wc(int argc, char **argv) {
+    if(argc != 0) {
+        printf("wc: Invalid amount of arguments.\n");
+        return -1;
+    }
+
+    int lines = 0;
+    char c;
+    while((c = getchar()) != EOF) {
+        if(c == '\n') {
+            lines++;
+        }
+    }
+
+    printf("%d\n", lines);
+    return 0;
+}
+
+static uint8_t is_vowel_or_line_break(char c) {
+    return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u'
+            || c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U' || c == '\n';
 }
 
 static void print_ps_header() {

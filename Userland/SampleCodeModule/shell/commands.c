@@ -53,7 +53,9 @@ static command_t commands[] = {
         {"phylo", "Starts the philosophers program.", 0, (mainFunction)&philosopherProgram},
         {"tsy", "Tests the synchronization primitives. Usage: tsy [n] [use_sem]", 0, (mainFunction)&test_sync},
         {"cat", "Prints stdin as received.", 0, (mainFunction)&cat},
-        {"loop", "Prints its PID every certain number of ticks. Usage: loop [ticks]", 0, (mainFunction)&loop}
+        {"loop", "Prints its PID every certain number of ticks. Usage: loop [ticks]", 0, (mainFunction)&loop},
+        {"filter", "Filters vowels and spaces from stdin.", 0, (mainFunction)&filter},
+        {"wc", "Counts the words in stdin.", 0, (mainFunction)&wc}
 };
 
 #define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))
