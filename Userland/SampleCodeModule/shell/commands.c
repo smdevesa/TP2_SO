@@ -3,6 +3,7 @@
 #include <stringutils.h>
 #include <programs.h>
 #include <syscalls.h>
+#include <philosophers.h>
 #include <test_util.h>
 
 #define HELP_IDX 0
@@ -37,6 +38,8 @@ static int inforegCommand(int argc, char * argv[]);
 static int fillCommandAndArgs(char ** command, char * args[], char * input);
 static void printError(char * command, char * message, char * usage);
 static int killCommand(int argc, char * argv[]);
+static int phyloCommand(int argc, char * argv[]);
+
 
 static command_t commands[] = {
         {"help", "Shows the available commands.", 1, &helpCommand},
@@ -48,6 +51,7 @@ static command_t commands[] = {
         {"tp", "Tests priority.", 0, (mainFunction)&test_prio},
         {"ps", "Shows the process list.", 0, (mainFunction)&ps},
         {"kill", "Kills a process. Usage: kill [pid]", 1, &killCommand},
+        {"phylo", "Starts the philosophers program.", 0, &phyloCommand},
         {"tsy", "Tests the synchronization primitives. Usage: tsy [n] [use_sem]", 0, (mainFunction)&test_sync},
         {"cat", "Prints stdin as received.", 0, (mainFunction)&cat}
 };
@@ -242,3 +246,9 @@ static int killCommand(int argc, char * argv[]) {
     }
     return OK;
 }
+
+static int phyloCommand(int argc, char * argv[]) {
+    philosopherProgram(argc, argv);
+    return OK;
+}
+

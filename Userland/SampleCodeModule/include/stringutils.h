@@ -38,6 +38,8 @@ void strncpy(char *dest, const char *src, size_t n);
  */
 void reverse(char *str);
 
+char * strcat(char *dest, const char *src);
+
 /**
  * @brief Returns a pointer to the first occurrence of the character c in the string str.
  * @param str

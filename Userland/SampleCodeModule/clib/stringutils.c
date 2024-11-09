@@ -44,6 +44,13 @@ int strcmp(const char *str1, const char *str2) {
     return 0;
 }
 
+char* strcat(char *dest, const char *src) {
+    char *rdest = dest;
+    while (*dest) dest++; 
+    while ((*dest++ = *src++)); 
+    return rdest; 
+}
+
 char * strchr(const char *str, int c) {
     for(int i=0; str[i] != 0; i++) {
         if(str[i] == c) {
