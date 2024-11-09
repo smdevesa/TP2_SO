@@ -12,6 +12,8 @@
 #define CURSOR_COLOR CYAN
 #define SCREEN_COLOR BLACK
 
+#define EOF -1
+
 #define USER_COLOR 0x0000AFFF
 #define USER_SEPARATOR_COLOR 0x005FD700
 
@@ -74,6 +76,9 @@ static void getInputAndPrint(char * input) {
     int count=0;
     printCursor(CURSOR_COLOR, 0);
     while((c = getchar()) != '\n') {
+        if(c == EOF) {
+            continue;
+        }
         if (c == '\t') {
             for (int j = 0; j < TAB_SIZE; j++) {
                 putchar(' ');

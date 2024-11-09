@@ -79,6 +79,9 @@ void keyboard_handler() {
             sys_write(1, "^D", 2, 0x00FFFFFF);
             send_eof_to_stdin();
         }
+        else if(ascii == 'c' || ascii == 'C') {
+            sys_write(1, "^C", 2, 0x00FFFFFF);
+        }
     }
     else if (ascii != 0) {
         cb_push(ascii);
