@@ -24,6 +24,9 @@
  */
 #define REGS_AMOUNT 17
 
+#define MIN_PRIORITY 1
+#define MAX_PRIORITY 4
+
 enum registers_idx {
     RAX_IDX = 0,
     RBX_IDX,

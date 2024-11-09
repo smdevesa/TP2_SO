@@ -40,6 +40,7 @@ static void printError(char * command, char * message, char * usage);
 static int killCommand(int argc, char * argv[]);
 static int block_command(int argc, char *argv[]);
 static int unblock_command(int argc, char *argv[]);
+static int nice_command(int argc, char *argv[]);
 
 
 static command_t commands[] = {
@@ -59,7 +60,8 @@ static command_t commands[] = {
         {"filter", "Filters vowels and spaces from stdin.", 0, (mainFunction)&filter},
         {"wc", "Counts the words in stdin.", 0, (mainFunction)&wc},
         {"block", "Blocks a process. Usage: block [pid]", 1, &block_command},
-        {"unblock", "Unblocks a process. Usage: unblock [pid]", 1, &unblock_command}
+        {"unblock", "Unblocks a process. Usage: unblock [pid]", 1, &unblock_command},
+        {"nice", "Changes the priority of a process. Usage: nice [pid] [priority]", 1, &nice_command}
 };
 
 #define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))
@@ -276,6 +278,25 @@ static int unblock_command(int argc, char *argv[]) {
     int ret = _sys_unblock(pid);
     if(ret == -1) {
         printError("unblock", "Error unblocking process.", NULL);
+        return ERROR;
+    }
+    return OK;
+}
+
+static int nice_command(int argc, char *argv[]) {
+    if(argc != 2) {
+        printError("nice", "Invalid amount of arguments.", "nice [pid] [priority]");
+        return ERROR;
+    }
+    int pid = atoi(argv[0]);
+    int priority = atoi(argv[1]);
+    if(priority < MIN_PRIORITY || priority > MAX_PRIORITY) {
+        printError("nice", "Invalid priority. Must be between 1 and 4.", "nice [pid] [priority]");
+        return ERROR;
+    }
+    int ret = _sys_changePriority(pid, priority);
+    if(ret == -1) {
+        printError("nice", "Error changing priority.", NULL);
         return ERROR;
     }
     return OK;
