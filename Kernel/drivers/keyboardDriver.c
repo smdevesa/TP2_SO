@@ -3,6 +3,7 @@
 #include <semaphore.h>
 
 #define KB_SEM_NAME "os_kb_sem"
+#define EOF -1
 
 extern uint8_t _getScancode();
 extern void _updateRegisters();
@@ -14,6 +15,7 @@ static char cb_push(char c);
 static char cb_pop();
 static int cb_isfull();
 static void updateRegisters();
+static void send_eof_to_stdin();
 
 /*
  * Keycode matrix:
@@ -51,6 +53,7 @@ static TCircularBuffer buffer = { .readIndex = 0, .writeIndex = 0, .size = 0 };
 static volatile uint8_t activeShift = 0;
 static volatile uint8_t activeCapsLock = 0;
 static volatile uint8_t activeCtrl = 0;
+static volatile uint8_t end_of_file = 0;
 
 static volatile uint64_t registers[REGS_AMOUNT];
 
@@ -67,9 +70,15 @@ void keyboard_handler() {
     uint8_t scancode = _getScancode();
     updateFlags(scancode);
     char ascii = scancodeToAscii(scancode);
-    if(activeCtrl && (ascii == 'r' || ascii == 'R')) {
-        registersFilled = 1;
-        updateRegisters();
+    if(activeCtrl) {
+        if(ascii == 'r' || ascii == 'R') {
+            registersFilled = 1;
+            updateRegisters();
+        }
+        else if(ascii == 'd' || ascii == 'D') {
+            sys_write(1, "^D", 2, 0x00FFFFFF);
+            send_eof_to_stdin();
+        }
     }
     else if (ascii != 0) {
         cb_push(ascii);
@@ -116,7 +125,6 @@ static int cb_isEmpty() {
 }
 
 static char cb_push(char c) {
-    // If the buffer is full, don't push anything
     if (cb_isfull()) {
         return 0;
     }
@@ -131,9 +139,13 @@ static int cb_isfull() {
 }
 
 static char cb_pop() {
-    // If the buffer is empty, don't pop anything
-    if (cb_isEmpty()) {
+    if(cb_isEmpty() && !end_of_file) {
         return 0;
+    }
+
+    if(end_of_file) {
+        end_of_file = 0;
+        return EOF;
     }
 
     char c = buffer.v[buffer.readIndex];
@@ -158,5 +170,10 @@ uint64_t getRegisters(uint64_t * r) {
         r[i] = registers[i];
     }
     return 1;
+}
+
+static void send_eof_to_stdin() {
+    end_of_file = 1;
+    semPost(KB_SEM_NAME);
 }
 

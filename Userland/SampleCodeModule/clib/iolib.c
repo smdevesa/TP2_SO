@@ -32,7 +32,7 @@ void printStringColor(const char * str, uint32_t color) {
 }
 
 void putchar(char c) {
-    putcharColor(c, WHITE);
+    if(c > 0) putcharColor(c, WHITE);
 }
 
 char * fgets(char *buffer, size_t size) {
