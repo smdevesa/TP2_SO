@@ -38,6 +38,8 @@ static int inforegCommand(int argc, char * argv[]);
 static int fillCommandAndArgs(char ** command, char * args[], char * input);
 static void printError(char * command, char * message, char * usage);
 static int killCommand(int argc, char * argv[]);
+static int block_command(int argc, char *argv[]);
+static int unblock_command(int argc, char *argv[]);
 
 
 static command_t commands[] = {
@@ -55,7 +57,9 @@ static command_t commands[] = {
         {"cat", "Prints stdin as received.", 0, (mainFunction)&cat},
         {"loop", "Prints its PID every certain number of ticks. Usage: loop [ticks]", 0, (mainFunction)&loop},
         {"filter", "Filters vowels and spaces from stdin.", 0, (mainFunction)&filter},
-        {"wc", "Counts the words in stdin.", 0, (mainFunction)&wc}
+        {"wc", "Counts the words in stdin.", 0, (mainFunction)&wc},
+        {"block", "Blocks a process. Usage: block [pid]", 1, &block_command},
+        {"unblock", "Unblocks a process. Usage: unblock [pid]", 1, &unblock_command}
 };
 
 #define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))
@@ -244,6 +248,34 @@ static int killCommand(int argc, char * argv[]) {
     int ret = _sys_kill(pid);
     if(ret == -1) {
         printError("kill", "Error killing process.", NULL);
+        return ERROR;
+    }
+    return OK;
+}
+
+static int block_command(int argc, char *argv[]) {
+    if(argc != 1) {
+        printError("block", "Invalid amount of arguments.", "block [pid]");
+        return ERROR;
+    }
+    int pid = atoi(argv[0]);
+    int ret = _sys_block(pid);
+    if(ret == -1) {
+        printError("block", "Error blocking process.", NULL);
+        return ERROR;
+    }
+    return OK;
+}
+
+static int unblock_command(int argc, char *argv[]) {
+    if(argc != 1) {
+        printError("unblock", "Invalid amount of arguments.", "unblock [pid]");
+        return ERROR;
+    }
+    int pid = atoi(argv[0]);
+    int ret = _sys_unblock(pid);
+    if(ret == -1) {
+        printError("unblock", "Error unblocking process.", NULL);
         return ERROR;
     }
     return OK;
