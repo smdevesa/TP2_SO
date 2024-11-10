@@ -1,7 +1,3 @@
-//
-// Created by Santiago Devesa on 23/10/2024.
-//
-
 #include <spinlock.h>
 #include <semaphore.h>
 #include <scheduler.h>
@@ -22,14 +18,13 @@ typedef struct {
     int value;
     int using;
     char name[MAX_SEM_NAME_LENGTH];
-    lock_t lock;
     circular_buffer_t queue;
+    lock_t lock;
 } semaphore_t;
 
 typedef struct {
     semaphore_t *semaphores[MAX_SEMAPHORES];
     int semaphoresCount;
-    lock_t lock; // protect semaphores array
 } semaphore_manager_t;
 
 semaphore_manager_t * semaphoreManager = NULL;
@@ -39,8 +34,9 @@ static uint64_t popFromQueue(semaphore_t * sem);
 static int addToQueue(semaphore_t * sem, uint32_t pid);
 static semaphore_t * getSemByName(char * name);
 static int getIdxByName(char * name);
+static int remove_process_from_queue(semaphore_t *sem, uint32_t pid);
 
-static int64_t getFreeId() {
+        static int64_t getFreeId() {
     for(int i=0; i<MAX_SEMAPHORES; i++) {
         if(semaphoreManager->semaphores[i] == NULL) {
             return i;
@@ -83,36 +79,29 @@ static semaphore_t * getSemByName(char * name) {
 void initSemManager() {
     if(semaphoreManager != NULL) return;
     semaphoreManager = (semaphore_manager_t *) SEMAPHORE_ADDRESS;
-    semaphoreManager->lock = 1;
-    acquire(&semaphoreManager->lock);
     for (int i = 0; i < MAX_SEMAPHORES; i++) {
         semaphoreManager->semaphores[i] = NULL;
     }
     semaphoreManager->semaphoresCount = 0;
-    release(&semaphoreManager->lock);
 }
 
 int64_t semOpen(char * name, int initialValue) {
     if(semaphoreManager == NULL) return -1;
     if(semaphoreManager->semaphoresCount >= MAX_SEMAPHORES) return -1;
 
-    acquire(&semaphoreManager->lock);
     semaphore_t * sem = getSemByName(name);
     if(sem != NULL) {
         acquire(&sem->lock);
         sem->using++;
         release(&sem->lock);
-        release(&semaphoreManager->lock);
         return 0;
     }
     int64_t id = getFreeId();
     if(id == -1) {
-        release(&semaphoreManager->lock);
         return -1;
     }
     sem = (semaphore_t *) my_malloc(sizeof(semaphore_t));
     if(sem == NULL) {
-        release(&semaphoreManager->lock);
         return -1;
     }
     sem->value = initialValue;
@@ -124,16 +113,13 @@ int64_t semOpen(char * name, int initialValue) {
     sem->using = 1;
     semaphoreManager->semaphores[id] = sem;
     semaphoreManager->semaphoresCount++;
-    release(&semaphoreManager->lock);
     return 0;
 }
 
 int64_t semClose(char * name) {
     if(semaphoreManager == NULL) return -1;
-    acquire(&semaphoreManager->lock);
     int idx = getIdxByName(name);
     if(idx == -1) {
-        release(&semaphoreManager->lock);
         return -1;
     }
 
@@ -142,23 +128,19 @@ int64_t semClose(char * name) {
         acquire(&sem->lock);
         sem->using--;
         release(&sem->lock);
-        release(&semaphoreManager->lock);
         return 0;
     }
 
     my_free(sem);
     semaphoreManager->semaphores[idx] = NULL;
     semaphoreManager->semaphoresCount--;
-    release(&semaphoreManager->lock);
     return 0;
 }
 
 int64_t semWait(char * name) {
     if (semaphoreManager == NULL) return -1;
 
-    acquire(&semaphoreManager->lock);
     semaphore_t * sem = getSemByName(name);
-    release(&semaphoreManager->lock);
 
     if (sem == NULL) return -1;
 
@@ -182,14 +164,10 @@ int64_t semWait(char * name) {
 int64_t semPost(char * name) {
     if (semaphoreManager == NULL) return -1;
 
-    acquire(&semaphoreManager->lock);
     semaphore_t * sem = getSemByName(name);
-    release(&semaphoreManager->lock);
-
     if (sem == NULL) return -1;
 
     acquire(&sem->lock);
-
     if (sem->queue.size > 0) {
         uint32_t pid = popFromQueue(sem);
         unblockProcess(pid);
@@ -198,5 +176,44 @@ int64_t semPost(char * name) {
     }
 
     release(&sem->lock);
+    return 0;
+}
+
+static int remove_process_from_queue(semaphore_t *sem, uint32_t pid) {
+    if (sem->queue.size == 0) return -1;
+
+    uint32_t i = sem->queue.readIndex;
+    uint32_t j = 0;
+    int found = -1;
+
+    while (j < sem->queue.size) {
+        if (sem->queue.v[i] == pid) {
+            found = i;
+            break;
+        }
+        i = (i + 1) % MAX_PROCESSES;
+        j++;
+    }
+
+    if (found == -1) return -1;
+    for (uint32_t k = found; k != sem->queue.writeIndex; k = (k + 1) % MAX_PROCESSES) {
+        uint32_t next = (k + 1) % MAX_PROCESSES;
+        sem->queue.v[k] = sem->queue.v[next];
+    }
+
+    sem->queue.writeIndex = (sem->queue.writeIndex + MAX_PROCESSES - 1) % MAX_PROCESSES;
+    sem->queue.size--;
+
+    return 0;
+}
+
+int remove_process_from_all_semaphore_queues(uint32_t pid) {
+    for (int i = 0; i < MAX_SEMAPHORES; i++) {
+        semaphore_t *sem = semaphoreManager->semaphores[i];
+        if (sem == NULL) continue;
+        acquire(&sem->lock);
+        remove_process_from_queue(sem, pid);
+        release(&sem->lock);
+    }
     return 0;
 }

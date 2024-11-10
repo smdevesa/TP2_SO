@@ -5,14 +5,14 @@
 #include "syscalls.h"
 
 
-#define SEM_ID "sem"
+#define SEM_ID "tsy_sem"
 #define TOTAL_PAIR_PROCESSES 2
 
 int64_t global; // shared memory
 
 void slowInc(int64_t *p, int64_t inc) {
     uint64_t aux = *p;
-    my_yield(); // This makes the race condition highly probable
+    my_yield();
     aux += inc;
     *p = aux;
 }

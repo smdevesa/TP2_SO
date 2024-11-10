@@ -8,6 +8,7 @@
 #include <keyboardDriver.h>
 #include <pipes.h>
 #include <time.h>
+#include <semaphore.h>
 
 extern void _hlt();
 extern void _forceNextProcess();
@@ -184,6 +185,7 @@ int32_t killProcess(uint16_t pid) {
     }
     uint8_t contextSwitch = scheduler->processes[pid]->status == RUNNING;
     remove_sleeping_process(pid);
+    remove_process_from_all_semaphore_queues(pid);
     if(process->writeFd != STDOUT) {
         send_pipe_eof(process->writeFd);
     }
