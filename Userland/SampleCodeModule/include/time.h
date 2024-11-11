@@ -35,5 +35,4 @@ uint8_t getMonth();
  */
 uint32_t getYear();
 
-
-#endif //TPE_ARQ_TIME_H
+#endif // TPE_ARQ_TIME_H

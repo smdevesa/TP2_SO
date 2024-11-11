@@ -28,50 +28,48 @@
 #define MAX_PRIORITY 4
 
 enum registers_idx {
-    RAX_IDX = 0,
-    RBX_IDX,
-    RCX_IDX,
-    RDX_IDX,
-    RSI_IDX,
-    RDI_IDX,
-    RBP_IDX,
-    R8_IDX,
-    R9_IDX,
-    R10_IDX,
-    R11_IDX,
-    R12_IDX,
-    R13_IDX,
-    R14_IDX,
-    R15_IDX,
-    RIP_IDX,
-    RSP_IDX
+	RAX_IDX = 0,
+	RBX_IDX,
+	RCX_IDX,
+	RDX_IDX,
+	RSI_IDX,
+	RDI_IDX,
+	RBP_IDX,
+	R8_IDX,
+	R9_IDX,
+	R10_IDX,
+	R11_IDX,
+	R12_IDX,
+	R13_IDX,
+	R14_IDX,
+	R15_IDX,
+	RIP_IDX,
+	RSP_IDX
 };
 
 typedef int (*mainFunction)(int argc, char **argv);
 
 #define MAX_NAME_LENGTH 256
 
-typedef enum status {
-    READY = 0,
-    BLOCKED,
-    RUNNING,
-    TERMINATED
-} processStatus_t;
+typedef enum status { READY = 0,
+					  BLOCKED,
+					  RUNNING,
+					  TERMINATED } processStatus_t;
 
 typedef struct processInfo {
-    int16_t pid;
-    int16_t parent;
-    char name[MAX_NAME_LENGTH];
-    uint8_t priority;
-    uint8_t unkillable;
-    void *stackBase;
-    processStatus_t status;
+	int16_t pid;
+	int16_t parent;
+	char name[MAX_NAME_LENGTH];
+	uint8_t priority;
+	uint8_t unkillable;
+	void *stackBase;
+	processStatus_t status;
 } processInfo_t;
 
-typedef struct mem_info{
-    uint64_t total_mem;
-    uint64_t used_mem;
-    uint64_t free_mem;
+typedef struct mem_info {
+	uint64_t total_mem;
+	uint64_t used_mem;
+	uint64_t free_mem;
 } mem_info_t;
 
 /**
@@ -81,7 +79,7 @@ typedef struct mem_info{
  * @param count the number of bytes to read.
  * @return the number of bytes read.
  */
-uint64_t _sys_read(int fd, char * buffer, int count);
+uint64_t _sys_read(int fd, char *buffer, int count);
 
 /**
  * @brief Writes a string to the file descriptor.
@@ -91,8 +89,7 @@ uint64_t _sys_read(int fd, char * buffer, int count);
  * @param color the color of the string in hexadecimal. Usage: 0x00RRGGBB.
  * @return the number of bytes written.
  */
-uint64_t _sys_write(int fd, const char * buffer, int count, uint32_t color);
-
+uint64_t _sys_write(int fd, const char *buffer, int count, uint32_t color);
 
 /**
  * @brief Draws a rectangle in the screen on the given coordinates.
@@ -101,9 +98,11 @@ uint64_t _sys_write(int fd, const char * buffer, int count, uint32_t color);
  * @param y top left corner y coordinate of the rectangle.
  * @param width width of the rectangle in pixels.
  * @param height height of the rectangle in pixels.
- * @return 0 if the rectangle was drawn successfully, 1 if the rectangle was out of bounds.
+ * @return 0 if the rectangle was drawn successfully, 1 if the rectangle was out
+ * of bounds.
  */
-uint64_t _sys_drawRectangle(uint32_t hexColor, uint64_t x, uint64_t y, uint64_t width, uint64_t height);
+uint64_t _sys_drawRectangle(uint32_t hexColor, uint64_t x, uint64_t y,
+							uint64_t width, uint64_t height);
 
 /**
  * @brief Clears the screen and resets the cursor to the origin of coordinates.
@@ -112,17 +111,20 @@ uint64_t _sys_clearScreen();
 
 /**
  * @brief Returns the current cursor position.
- * @return the current cursor y position in the higher 32 bits and the x position in the lower 32 bits.
+ * @return the current cursor y position in the higher 32 bits and the x
+ * position in the lower 32 bits.
  */
 uint64_t _sys_getCoords();
 
 /**
- * @brief Returns the screen width in the high 32 bits and the screen height in the low 32 bits.
+ * @brief Returns the screen width in the high 32 bits and the screen height in
+ * the low 32 bits.
  */
 uint64_t _sys_getScreenInfo();
 
 /**
- * @brief Returns the font width in the high 32 bits and the font height in the low 32 bits.
+ * @brief Returns the font width in the high 32 bits and the font height in the
+ * low 32 bits.
  */
 uint64_t _sys_getFontInfo();
 
@@ -144,7 +146,7 @@ uint64_t _sys_setFontScale(uint64_t scale);
  * @param regs the buffer to store the registers. Must be at least 17 elements.
  * @return 1 if the registers were written successfully, 0 otherwise.
  */
-uint64_t _sys_getRegisters(uint64_t * regs);
+uint64_t _sys_getRegisters(uint64_t *regs);
 
 /**
  * @brief Sleeps the current process for the given amount of milliseconds.
@@ -175,10 +177,13 @@ uint64_t _sys_yield();
  * @param argv the arguments of the process.
  * @param name the name of the process.
  * @param unkillable if the process is unkillable.
- * @param fileDescriptors the file descriptors of the process. The first element is the input file descriptor and the second element is the output file descriptor.
+ * @param fileDescriptors the file descriptors of the process. The first element
+ * is the input file descriptor and the second element is the output file
+ * descriptor.
  * @return the PID of the new process.
  */
-int64_t _sys_createProcess(mainFunction main, char **argv, char *name, uint8_t unkillable, int *fileDescriptors);
+int64_t _sys_createProcess(mainFunction main, char **argv, char *name,
+						   uint8_t unkillable, int *fileDescriptors);
 
 /**
  * @brief Kills a process.
@@ -231,7 +236,7 @@ void _sys_free(void *ptr);
 /**
  * @brief Returns the process list terminated with a process with pid == -1.
  */
-processInfo_t * _sys_ps();
+processInfo_t *_sys_ps();
 
 /**
  * @brief Opens a semaphore.
@@ -239,14 +244,14 @@ processInfo_t * _sys_ps();
  * @param initialValue: the initial value of the semaphore.
  * @return 0 if the semaphore was opened successfully, -1 otherwise.
  */
-int64_t _sys_semOpen(char * name, uint64_t initialValue);
+int64_t _sys_semOpen(char *name, uint64_t initialValue);
 
 /**
  * @brief Closes a semaphore.
  * @param name: the name of the semaphore.
  * @return 0 if the semaphore was closed successfully, -1 otherwise.
  */
-int64_t _sys_semClose(char * name);
+int64_t _sys_semClose(char *name);
 
 /**
  * @brief Waits for a semaphore.
@@ -254,7 +259,7 @@ int64_t _sys_semClose(char * name);
  * @return 0 if the semaphore was waited
  *        -1 if the semaphore was not waited
  */
-int64_t _sys_semWait(char * name);
+int64_t _sys_semWait(char *name);
 
 /**
  * @brief Posts a semaphore.
@@ -262,7 +267,7 @@ int64_t _sys_semWait(char * name);
  * @return 0 if the semaphore was posted
  *        -1 if the semaphore was not posted
  */
-int64_t _sys_semPost(char * name);
+int64_t _sys_semPost(char *name);
 
 /**
  * @brief Waits for a process to finish.
@@ -289,6 +294,6 @@ int64_t _sys_destroy_pipe(int writeFd);
  * @brief Returns the memory information.
  * @return a struct with the memory information.
  */
-mem_info_t * _sys_get_mem_info();
+mem_info_t *_sys_get_mem_info();
 
 #endif

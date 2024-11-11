@@ -10,4 +10,4 @@ int filter(int argc, char **argv);
 int wc(int argc, char **argv);
 int mem(int argc, char **argv);
 
-#endif //TP2_SO_PROGRAMS_H
+#endif // TP2_SO_PROGRAMS_H

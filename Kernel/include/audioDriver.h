@@ -14,4 +14,4 @@ uint64_t playSound(uint32_t f);
  */
 uint64_t stopSound();
 
-#endif //TPE_ARQ_AUDIODRIVER_H
+#endif // TPE_ARQ_AUDIODRIVER_H

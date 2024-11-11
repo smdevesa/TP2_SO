@@ -8,23 +8,23 @@
 #define STDOUT 1
 
 enum registers_idx {
-    RAX_IDX = 0,
-    RBX_IDX,
-    RCX_IDX,
-    RDX_IDX,
-    RSI_IDX,
-    RDI_IDX,
-    RBP_IDX,
-    R8_IDX,
-    R9_IDX,
-    R10_IDX,
-    R11_IDX,
-    R12_IDX,
-    R13_IDX,
-    R14_IDX,
-    R15_IDX,
-    RIP_IDX,
-    RSP_IDX
+	RAX_IDX = 0,
+	RBX_IDX,
+	RCX_IDX,
+	RDX_IDX,
+	RSI_IDX,
+	RDI_IDX,
+	RBP_IDX,
+	R8_IDX,
+	R9_IDX,
+	R10_IDX,
+	R11_IDX,
+	R12_IDX,
+	R13_IDX,
+	R14_IDX,
+	R15_IDX,
+	RIP_IDX,
+	RSP_IDX
 };
 
 /**
@@ -46,14 +46,17 @@ int64_t sys_write(int fd, const char *buffer, int count, uint32_t color);
 
 /**
  * @brief Draws a rectangle in the screen on the given coordinates.
- * @param hex_color: the color of the rectangle in hexadecimal. Usage: 0x00RRGGBB.
+ * @param hex_color: the color of the rectangle in hexadecimal. Usage:
+ * 0x00RRGGBB.
  * @param x: the x coordinate of the rectangle.
  * @param y: the y coordinate of the rectangle.
  * @param width: the width of the rectangle.
  * @param height: the height of the rectangle.
- * @return 0 if the rectangle was drawn successfully, 1 if the rectangle was out of bounds.
+ * @return 0 if the rectangle was drawn successfully, 1 if the rectangle was out
+ * of bounds.
  */
-int64_t sys_draw_rectangle(uint32_t hex_color, uint64_t x, uint64_t y, uint64_t width, uint64_t height);
+int64_t sys_draw_rectangle(uint32_t hex_color, uint64_t x, uint64_t y,
+						   uint64_t width, uint64_t height);
 
 /**
  * @brief Clears the screen.
@@ -63,18 +66,21 @@ int64_t sys_clear_screen();
 
 /**
  * @brief Returns the current cursor position.
- * @return the current cursor y position in the higher 32 bits and the x position in the lower 32 bits.
+ * @return the current cursor y position in the higher 32 bits and the x
+ * position in the lower 32 bits.
  */
 int64_t sys_get_coords();
 
 /**
- * @brief Returns the screen width in the high 32 bits and the screen height in the low 32 bits.
+ * @brief Returns the screen width in the high 32 bits and the screen height in
+ * the low 32 bits.
  * @return screen information.
  */
 int64_t sys_get_screen_info();
 
 /**
- * @brief Returns the font width in the high 32 bits and the font height in the low 32 bits.
+ * @brief Returns the font width in the high 32 bits and the font height in the
+ * low 32 bits.
  * @return font information.
  */
 int64_t sys_get_font_info();
@@ -96,8 +102,10 @@ int64_t sys_set_font_scale(uint64_t scale);
 /**
  * @brief Fills the registers array with the current values of the registers.
  * Registers must be updated with CTRL + R before calling this function.
- * @param r: the array to fill with the registers. Be sure of having at least REGS_AMOUNT elements.
- * @return 0 if the registers were filled successfully, 1 if the registers were not filled.
+ * @param r: the array to fill with the registers. Be sure of having at least
+ * REGS_AMOUNT elements.
+ * @return 0 if the registers were filled successfully, 1 if the registers were
+ * not filled.
  */
 int64_t sys_get_registers(uint64_t *r);
 
@@ -147,22 +155,26 @@ int64_t sys_getpid();
  * @param argv: the arguments of the process.
  * @param name: the name of the process.
  * @param unkillable: if the process is unkillable.
- * @param fileDescriptors: the file descriptors of the process. On index 0 is the input file descriptor and on index 1 is the output file descriptor.
+ * @param fileDescriptors: the file descriptors of the process. On index 0 is
+ * the input file descriptor and on index 1 is the output file descriptor.
  * @return 0 if the process was created successfully, -1 otherwise.
  */
-int64_t sys_create_process(uint64_t main, char **argv, char *name, uint8_t unkillable, int *file_descriptors);
+int64_t sys_create_process(uint64_t main, char **argv, char *name,
+						   uint8_t unkillable, int *file_descriptors);
 
 /**
  * @brief Blocks the process with the given PID.
  * @param pid: the PID of the process to block.
- * @return 0 if the process was blocked successfully, -1 if the process was not blocked.
+ * @return 0 if the process was blocked successfully, -1 if the process was not
+ * blocked.
  */
 int64_t sys_block_process(uint16_t pid);
 
 /**
  * @brief Unblocks the process with the given PID.
  * @param pid: the PID of the process to unblock.
- * @return 0 if the process was unblocked successfully, -1 if the process was not unblocked.
+ * @return 0 if the process was unblocked successfully, -1 if the process was
+ * not unblocked.
  */
 int64_t sys_unblock_process(uint16_t pid);
 
@@ -170,7 +182,8 @@ int64_t sys_unblock_process(uint16_t pid);
  * @brief Changes the priority of the process with the given PID.
  * @param pid: the PID of the process to change the priority.
  * @param new_priority: the new priority of the process.
- * @return 0 if the priority was changed successfully, -1 if the priority was not changed.
+ * @return 0 if the priority was changed successfully, -1 if the priority was
+ * not changed.
  */
 int64_t sys_change_priority(uint16_t pid, uint8_t new_priority);
 
@@ -178,7 +191,8 @@ int64_t sys_change_priority(uint16_t pid, uint8_t new_priority);
  * @brief Kills the process with the given PID.
  * @param pid: the PID of the process to kill.
  * @param ret_value: the return value of the process.
- * @return 0 if the process was killed successfully, -1 if the process was not killed.
+ * @return 0 if the process was killed successfully, -1 if the process was not
+ * killed.
  */
 int64_t sys_kill_process(uint16_t pid);
 
@@ -213,7 +227,8 @@ int64_t sys_ps();
  * @brief Opens a new named semaphore.
  * @param name: the name of the semaphore.
  * @param initial_value: the initial value of the semaphore.
- * @return 0 if the semaphore was opened successfully, -1 if the semaphore was not opened.
+ * @return 0 if the semaphore was opened successfully, -1 if the semaphore was
+ * not opened.
  */
 int64_t sys_sem_open(char *name, uint64_t initial_value);
 
@@ -248,7 +263,8 @@ int64_t sys_waitpid(uint16_t pid);
 /**
  * @brief Creates a new pipe.
  * @param fds: the file descriptors of the pipe.
- * @return 0 if the pipe was created successfully, -1 if the pipe was not created.
+ * @return 0 if the pipe was created successfully, -1 if the pipe was not
+ * created.
  */
 int64_t sys_create_pipe(int fds[2]);
 

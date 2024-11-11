@@ -20,7 +20,8 @@ void strcpy(char *dest, const char *src);
  * @brief Compares two null-terminated strings.
  * @param str1 The first string.
  * @param str2 The second string.
- * @return 0 if the strings are equal, a negative number if str1 is less than str2, a positive number if str1 is greater than str2.
+ * @return 0 if the strings are equal, a negative number if str1 is less than
+ * str2, a positive number if str1 is greater than str2.
  */
 int strcmp(const char *str1, const char *str2);
 
@@ -38,14 +39,16 @@ void strncpy(char *dest, const char *src, size_t n);
  */
 void reverse(char *str);
 
-char * strcat(char *dest, const char *src);
+char *strcat(char *dest, const char *src);
 
 /**
- * @brief Returns a pointer to the first occurrence of the character c in the string str.
+ * @brief Returns a pointer to the first occurrence of the character c in the
+ * string str.
  * @param str
  * @param c
- * @return A pointer to the first occurrence of the character c in the string str, or NULL if the character is not found.
+ * @return A pointer to the first occurrence of the character c in the string
+ * str, or NULL if the character is not found.
  */
-char * strchr(const char *str, int c);
+char *strchr(const char *str, int c);
 
-#endif //TPE_ARQ_STRINGUTILS_H
+#endif // TPE_ARQ_STRINGUTILS_H

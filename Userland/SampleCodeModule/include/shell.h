@@ -10,9 +10,8 @@ void shell();
  * @brief Sets the username.
  * @param username
  */
-void setUsername(char * username);
-
+void setUsername(char *username);
 
 int noScreenSpace();
 
-#endif //TPE_ARQ_SHELL_H
+#endif // TPE_ARQ_SHELL_H

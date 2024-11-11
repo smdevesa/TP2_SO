@@ -7,6 +7,6 @@
 
 #include <stdint.h>
 
-void philosopherProgram(int argc, char * argv[]);
+void philosopherProgram(int argc, char *argv[]);
 
-#endif //TP2_SO_PHILOSOPHERS_H
+#endif // TP2_SO_PHILOSOPHERS_H

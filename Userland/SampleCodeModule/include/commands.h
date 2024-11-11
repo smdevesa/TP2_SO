@@ -15,8 +15,9 @@
 /**
  * @brief Parses the command and executes it.
  * @param input the command to parse.
- * @return 0 if the command was executed successfully, 1 if the command was not found.
+ * @return 0 if the command was executed successfully, 1 if the command was not
+ * found.
  */
-int parseCommand(char * input);
+int parseCommand(char *input);
 
-#endif //TPE_ARQ_COMMANDS_H
+#endif // TPE_ARQ_COMMANDS_H

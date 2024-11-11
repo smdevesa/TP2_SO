@@ -11,4 +11,4 @@ int readPipe(int fd, char *buffer, int bytes);
 void destroyPipe(int writeFd);
 void send_pipe_eof(int fd);
 
-#endif //TP2_SO_PIPES_H
+#endif // TP2_SO_PIPES_H

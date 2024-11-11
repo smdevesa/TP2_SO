@@ -5,7 +5,7 @@
 #include <shell.h>
 
 int main() {
-    setUsername("Clifford");
-    shell();
-    return 0;
+	setUsername("Clifford");
+	shell();
+	return 0;
 }

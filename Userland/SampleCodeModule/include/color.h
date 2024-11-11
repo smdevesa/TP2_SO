@@ -10,4 +10,4 @@
 #define CYAN 0x0000FFFF
 #define MAGENTA 0x00FF00FF
 
-#endif //TPE_ARQ_COLOR_H
+#endif // TPE_ARQ_COLOR_H

@@ -2,8 +2,8 @@
 #ifndef TPE_ARQ_FONT_H
 #define TPE_ARQ_FONT_H
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 // Funciones de informacion de la fuente
 
@@ -24,6 +24,6 @@ uint8_t getFontHeight();
  * o NULL si el caracter no esta en la fuente.
  * @param c: el caracter a representar.
  */
-uint8_t * getFontChar(char c);
+uint8_t *getFontChar(char c);
 
-#endif //TPE_ARQ_FONT_H
+#endif // TPE_ARQ_FONT_H
