@@ -1,7 +1,3 @@
-//
-// Created by Tizifuchi12 on 11/11/2024.
-//
-
 #ifdef BUDDY_MM
 
 #include <memory_manager.h>

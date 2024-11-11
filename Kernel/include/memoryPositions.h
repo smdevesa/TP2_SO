@@ -7,9 +7,9 @@
 
 #define SCHEDULER_ADDRESS ((void *)0x60000)
 #define SEMAPHORE_ADDRESS ((void *)0x70000)
-#define START_FREE_MEM ((void *)0x800000)
+#define START_FREE_MEM ((void *)0xF00000)
 #define SHELL_ADDRESS ((void *)0x400000)
 #define MEMORY_MANAGER_ADDRESS ((void *)0x600000)
-#define LIMIT (0x800000)
+#define LIMIT (0xF00000)
 
 #endif //TP2_SO_MEMORYPOSITIONS_H
