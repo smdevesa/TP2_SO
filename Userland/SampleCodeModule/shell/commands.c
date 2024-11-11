@@ -104,7 +104,6 @@ int parseCommand(char *input) {
     }
 
     if(pipe_pos) {
-        if(executable_commands[0])
         int pipefds[2];
         if(_sys_create_pipe(pipefds) == -1) {
             printError("pipe", "Error creating pipe.", NULL);
