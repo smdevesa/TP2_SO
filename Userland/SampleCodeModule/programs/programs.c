@@ -87,7 +87,7 @@ int wc(int argc, char **argv) {
         return -1;
     }
 
-    int lines = 0;
+    int lines = 1;
     char c;
     while((c = getchar()) != EOF) {
         if(c == '\n') {

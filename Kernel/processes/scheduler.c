@@ -123,7 +123,7 @@ void * schedule(void *prevRSP) {
     scheduler->current = nextProcess->pid;
     uint64_t nextRSP = (uint64_t)nextProcess->stackPos;
     nextProcess->status = RUNNING;
-    
+
     return (void *)nextRSP;
 }
 
