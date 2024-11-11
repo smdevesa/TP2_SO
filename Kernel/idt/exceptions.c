@@ -15,8 +15,8 @@ extern uint64_t * _getSnapshot();
 #define EXCEPTION_OPCODE "ERROR 0x06 Invalid Opcode exception\n\n"
 
 
-static void launchException(char * message);
-static void dumpRegisters();
+static void launch_exception(char * message);
+static void dump_registers();
 
 static char * regNames[] = {
     "RAX   ", "RBX   ", "RCX   ", "RDX   ", "RSI   ", "RDI   ", "RBP   ",
@@ -27,42 +27,42 @@ static char * regNames[] = {
 static int regsAmount = (sizeof(regNames) / sizeof(regNames[0]));
 
 
-void exceptionDispatcher(int exception) {
+void exception_dispatcher(int exception) {
     char * message;
     switch (exception) {
         case ZERO_EXCEPTION_ID: message = EXCEPTION_ZERO; break;
         case OPCODE_EXCEPTION_ID: message = EXCEPTION_OPCODE; break;
         default: message = "Unknown exception\n\n"; break;
     }
-    launchException(message);
+    launch_exception(message);
 }
 
-static void launchException(char * message) {
-    uint64_t oldBgColor = sys_getBgColor();
-    sys_setBgColor(BGCOLOR);
+static void launch_exception(char * message) {
+    uint64_t oldBgColor = sys_get_bg_color();
+    sys_set_bg_color(BGCOLOR);
     uint8_t oldScale = getScale();
-    setScale(2);
-    sys_clearScreen();
+    sys_set_font_scale(2);
+    sys_clear_screen();
 	sys_write(1, message, strlen(message), WHITE);
-    dumpRegisters();
+    dump_registers();
 
-    char * continueMessage = "\nPress any key to relaunch shell...";
-    sys_write(1, continueMessage , strlen(continueMessage), WHITE);
+    char * continue_message = "\nPress any key to relaunch shell...";
+    sys_write(1, continue_message , strlen(continue_message), WHITE);
 
-    int readBytes = 0;
+    int read_bytes = 0;
     char c;
     _sti();
-    while(readBytes == 0){
-        readBytes = sys_read(0, &c, 1);
+    while(read_bytes == 0){
+        read_bytes = sys_read(0, &c, 1);
     }
 
     // Old scale and color
-    sys_setBgColor(oldBgColor);
-    sys_clearScreen();
-    setScale(oldScale);
+    sys_set_bg_color(oldBgColor);
+    sys_clear_screen();
+    sys_set_font_scale(oldScale);
 }
 
-static void dumpRegisters(){
+static void dump_registers(){
     uint64_t * registers = _getSnapshot();
     char buffer[17];
 

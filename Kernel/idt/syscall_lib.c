@@ -20,10 +20,10 @@
 static uint16_t print_x = 0;
 static uint16_t print_y = 0;
 
-uint32_t bgColor = DEFAULT_BG_COLOR;
+uint32_t bg_color = DEFAULT_BG_COLOR;
 
-static int printSpecialCases(char c);
-static int printBuffer(const char * buffer, int count, uint32_t color);
+static int print_special_cases(char c);
+static int print_buffer(const char * buffer, int count, uint32_t color);
 
 int64_t sys_read(int fd, char * buffer, int count) {
     if(fd < 0 || count <= 0) return -1;
@@ -57,13 +57,13 @@ int64_t sys_write(int fd, const char * buffer, int count, uint32_t color) {
         if(fds[1] != STDOUT) {
             return writePipe(fds[1], buffer, count);
         }
-        return printBuffer(buffer, count, color);
+        return print_buffer(buffer, count, color);
     }
     // if the file descriptor is not STDOUT, it must be a pipe
     return writePipe(fd, buffer, count);
 }
 
-static int printBuffer(const char * buffer, int count, uint32_t color) {
+static int print_buffer(const char * buffer, int count, uint32_t color) {
     for(int i = 0; i < count; i++) {
         if(buffer[i] != ESC) {
             // Check if the character fits in the screen
@@ -78,8 +78,8 @@ static int printBuffer(const char * buffer, int count, uint32_t color) {
             }
 
             // Check if the character is a special case
-            if (!printSpecialCases(buffer[i])) {
-                drawChar(buffer[i], color, bgColor, print_x, print_y);
+            if (!print_special_cases(buffer[i])) {
+                drawChar(buffer[i], color, bg_color, print_x, print_y);
                 print_x += getFontWidth() * getScale();
             }
         }
@@ -87,7 +87,7 @@ static int printBuffer(const char * buffer, int count, uint32_t color) {
     return count;
 }
 
-static int printSpecialCases(char c) {
+static int print_special_cases(char c) {
     switch (c) {
         case '\n':
             print_x = 0;
@@ -106,98 +106,98 @@ static int printSpecialCases(char c) {
                 // Align the cursor to the previous line
                 print_x -= print_x % (getFontWidth() * getScale());
             }
-            drawChar(' ', BLACK, bgColor, print_x, print_y);
+            drawChar(' ', BLACK, bg_color, print_x, print_y);
             return 1;
         default:
             return 0;
     }
 }
 
-uint64_t sys_drawRectangle(uint32_t hexColor, uint64_t x, uint64_t y, uint64_t width, uint64_t height) {
-    return drawRectangle(hexColor, x, y, width, height);
+int64_t sys_draw_rectangle(uint32_t hex_color, uint64_t x, uint64_t y, uint64_t width, uint64_t height) {
+    return drawRectangle(hex_color, x, y, width, height);
 }
 
-uint64_t sys_getCoords() {
+int64_t sys_get_coords() {
     // Return the y in the high 32 bits and the x in the low 32 bits
     return ((uint64_t) print_y << 32) | print_x;
 }
 
-uint64_t sys_clearScreen() {
-    drawRectangle(bgColor, 0, 0, getScreenWidth(), getScreenHeight());
+int64_t sys_clear_screen() {
+    drawRectangle(bg_color, 0, 0, getScreenWidth(), getScreenHeight());
     print_x = 0;
     print_y = 0;
     return 0;
 }
 
-uint64_t sys_getScreenInfo() {
+int64_t sys_get_screen_info() {
     // return the width in the high 32 bits and the height in the low 32 bits
     return ((uint64_t) getScreenWidth() << 32) | getScreenHeight();
 }
 
-uint64_t sys_getFontInfo() {
+int64_t sys_get_font_info() {
     // return the width in the high 32 bits and the height in the low 32 bits
     return ((uint64_t) (getFontWidth() * getScale()) << 32) | (getFontHeight() * getScale());
 }
 
-uint64_t sys_getTime(uint64_t arg) {
+int64_t sys_get_time(uint64_t arg) {
     return getTime(arg);
 }
 
-uint64_t sys_setFontScale(uint64_t scale) {
+int64_t sys_set_font_scale(uint64_t scale) {
     return setScale(scale);
 }
 
-uint64_t sys_getRegisters(uint64_t * r) {
+int64_t sys_get_registers(uint64_t * r) {
     return getRegisters(r);
 }
 
-uint64_t sys_sleep(uint64_t ticks) {
+int64_t sys_sleep(uint64_t ticks) {
     sleep(ticks);
     return 1;
 }
 
-uint64_t sys_playSound(uint64_t f, uint64_t millis) {
+int64_t sys_play_sound(uint64_t f, uint64_t millis) {
     playSound(f);
     sys_sleep(millis);
     stopSound();
     return 1;
 }
 
-uint64_t sys_setBgColor(uint32_t color) {
-    bgColor = color;
+int64_t sys_set_bg_color(uint32_t color) {
+    bg_color = color;
     return 1;
 }
 
-uint64_t sys_getBgColor() {
-    return bgColor;
+int64_t sys_get_bg_color() {
+    return bg_color;
 }
 
-uint64_t sys_yield() {
+int64_t sys_yield() {
     yield();
     return 1;
 }
 
-uint64_t sys_getPid() {
+int64_t sys_getpid() {
     return getPid();
 }
 
-int64_t sys_createProcess(uint64_t main, char **argv, char *name, uint8_t unkillable, int *fileDescriptors) {
+int64_t sys_create_process(uint64_t main, char **argv, char *name, uint8_t unkillable, int *fileDescriptors) {
     return addProcess((mainFunction)main, argv, name, unkillable, fileDescriptors);
 }
 
-int64_t sys_blockProcess(uint16_t pid) {
+int64_t sys_block_process(uint16_t pid) {
     return blockProcess(pid);
 }
 
-int64_t sys_unblockProcess(uint16_t pid) {
+int64_t sys_unblock_process(uint16_t pid) {
     return unblockProcess(pid);
 }
 
-int64_t sys_changePriority(uint16_t pid, uint8_t newPriority) {
+int64_t sys_change_priority(uint16_t pid, uint8_t newPriority) {
     return changePriority(pid, newPriority);
 }
 
-int64_t sys_killProcess(uint16_t pid) {
+int64_t sys_kill_process(uint16_t pid) {
     return killProcess(pid);
 }
 
@@ -206,33 +206,33 @@ int64_t sys_exit(int64_t retValue) {
     return 1;
 }
 
-uint64_t sys_malloc(uint64_t size) {
+int64_t sys_malloc(uint64_t size) {
     return (uint64_t) my_malloc(size);
 }
 
-uint64_t sys_free(uint64_t ptr) {
+int64_t sys_free(uint64_t ptr) {
     my_free((void *) ptr);
     return 1;
 }
 
-uint64_t sys_ps() {
+int64_t sys_ps() {
     return (uint64_t) ps();
 }
 
-int64_t sys_semOpen(char * name, uint64_t initialValue){
+int64_t sys_sem_open(char * name, uint64_t initialValue){
     return semOpen(name, initialValue);
 }
 
-int64_t sys_semClose(char * name){
+int64_t sys_sem_close(char * name){
     return semClose(name);
 }
 
-int64_t sys_semWait(char * name){
+int64_t sys_sem_wait(char * name){
     return semWait(name);
 }
 
 
-int64_t sys_semPost(char * name){
+int64_t sys_sem_post(char * name){
     return semPost(name);
 }
 
@@ -249,6 +249,6 @@ int64_t sys_destroy_pipe(int writeFd){
     return 1;
 }
 
-uint64_t sys_get_mem_info(){
+int64_t sys_get_mem_info(){
     return (uint64_t)mem_dump();
 }

@@ -21,8 +21,8 @@ GLOBAL _forceNextProcess
 GLOBAL _getSnapshot
 
 EXTERN irqDispatcher
-EXTERN syscallDispatcher
-EXTERN exceptionDispatcher
+EXTERN syscall_dispatcher
+EXTERN exception_dispatcher
 EXTERN getStackBase
 EXTERN schedule
 
@@ -119,7 +119,7 @@ SECTION .text
     fillSnapshot
 
 	mov rdi, %1
-	call exceptionDispatcher
+	call exception_dispatcher
 
 	call getStackBase
 
@@ -219,7 +219,7 @@ _irq05Handler:
 _irq80Handler:
     pushState 0
     mov r9, rax
-    call syscallDispatcher
+    call syscall_dispatcher
     popState 0
     iretq
 
