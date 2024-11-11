@@ -24,7 +24,7 @@ This project is a custom-built kernel designed to demonstrate low-level OS funct
 1. **Clone the Repository**:
    ```bash
    git clone git@github.com:smdevesa/TP2_SO.git
-   cd TP2_SO.git
+   cd TP2_SO
    ```
 
 2. **Pull and run the Docker image**:
