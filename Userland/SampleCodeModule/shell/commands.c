@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <commands.h>
 #include <iolib.h>
 #include <stringutils.h>
@@ -102,6 +104,7 @@ int parseCommand(char *input) {
     }
 
     if(pipe_pos) {
+        if(executable_commands[0])
         int pipefds[2];
         if(_sys_create_pipe(pipefds) == -1) {
             printError("pipe", "Error creating pipe.", NULL);
