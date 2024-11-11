@@ -248,3 +248,7 @@ int64_t sys_destroy_pipe(int writeFd){
     destroyPipe(writeFd);
     return 1;
 }
+
+uint64_t sys_get_mem_info(){
+    return (uint64_t)mem_dump();
+}

@@ -29,6 +29,7 @@ GLOBAL _sys_semPost
 GLOBAL _sys_waitpid
 GLOBAL _sys_create_pipe
 GLOBAL _sys_destroy_pipe
+GLOBAL _sys_get_mem_info
 
 section .text
 
@@ -68,3 +69,4 @@ _sys_semPost: syscall 0x1A
 _sys_waitpid: syscall 0x1B
 _sys_create_pipe: syscall 0x1C
 _sys_destroy_pipe: syscall 0x1D
+_sys_get_mem_info: syscall 0x1E

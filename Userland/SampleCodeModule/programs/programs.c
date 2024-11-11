@@ -99,6 +99,17 @@ int wc(int argc, char **argv) {
     return 0;
 }
 
+int mem(int argc, char **argv) {
+    if(argc != 0) {
+        printf("mem: Invalid amount of arguments.\n");
+        return -1;
+    }
+
+    mem_info_t * mem_info = _sys_get_mem_info();
+    printf("Total memory: %d\nUsed memory: %d\nFree memory: %d\n", mem_info->total_mem, mem_info->used_mem, mem_info->free_mem);
+    return 0;
+}
+
 static uint8_t is_vowel_or_line_break(char c) {
     return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u'
             || c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U' || c == '\n';

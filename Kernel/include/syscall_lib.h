@@ -244,4 +244,9 @@ int64_t sys_create_pipe(int fds[2]);
  */
 int64_t sys_destroy_pipe(int writeFd);
 
+/**
+ * @return the memory information of the system.
+ */
+uint64_t sys_get_mem_info();
+
 #endif

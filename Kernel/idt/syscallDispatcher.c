@@ -3,7 +3,8 @@
 
 enum syscalls {READ = 0, WRITE, RECTANGLE, CLEAR, COORDS, SCREENINFO, FONTINFO, GETTIME, SETSCALE,
         GETREGS, SLEEP, PLAYSOUND, YIELD, GETPID, CREATE_PROCESS, KILL_PROCESS, BLOCK, UNBLOCK, CHANGE_PRIORITY,
-        EXIT, MALLOC, FREE, PS, SEM_OPEN, SEM_CLOSE, SEM_WAIT, SEM_POST, WAITPID, CREATE_PIPE, DESTROY_PIPE};
+        EXIT, MALLOC, FREE, PS, SEM_OPEN, SEM_CLOSE, SEM_WAIT, SEM_POST, WAITPID, CREATE_PIPE, DESTROY_PIPE,
+        GET_MEM_INFO};
 
 uint64_t syscallDispatcher(int64_t rdi, int64_t rsi, int64_t rdx, int64_t rcx, int64_t r8, int64_t rax) {
     // rax contains the syscall id
@@ -38,6 +39,7 @@ uint64_t syscallDispatcher(int64_t rdi, int64_t rsi, int64_t rdx, int64_t rcx, i
         case WAITPID: return sys_waitpid(rdi);
         case CREATE_PIPE: return sys_create_pipe((int *) rdi);
         case DESTROY_PIPE: return sys_destroy_pipe(rdi);
+        case GET_MEM_INFO: return sys_get_mem_info();
         default: return 0;
     }
 }

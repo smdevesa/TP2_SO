@@ -61,7 +61,8 @@ static command_t commands[] = {
         {"wc", "Counts the words in stdin.", 0, (mainFunction)&wc},
         {"block", "Blocks a process. Usage: block [pid]", 1, &block_command},
         {"unblock", "Unblocks a process. Usage: unblock [pid]", 1, &unblock_command},
-        {"nice", "Changes the priority of a process. Usage: nice [pid] [priority]", 1, &nice_command}
+        {"nice", "Changes the priority of a process. Usage: nice [pid] [priority]", 1, &nice_command},
+        {"mem", "Prints the memory information.", 0, (mainFunction)&mem}
 };
 
 #define COMMANDS_COUNT (sizeof(commands) / sizeof(commands[0]))

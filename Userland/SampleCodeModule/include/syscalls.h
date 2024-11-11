@@ -68,6 +68,12 @@ typedef struct processInfo {
     processStatus_t status;
 } processInfo_t;
 
+typedef struct mem_info{
+    uint64_t total_mem;
+    uint64_t used_mem;
+    uint64_t free_mem;
+} mem_info_t;
+
 /**
  * @brief Reads a string from the file descriptor.
  * @param fd file descriptor
@@ -278,5 +284,11 @@ int64_t _sys_create_pipe(int fds[2]);
  * @return 0 if the pipe was destroyed successfully, -1 otherwise.
  */
 int64_t _sys_destroy_pipe(int writeFd);
+
+/**
+ * @brief Returns the memory information.
+ * @return a struct with the memory information.
+ */
+mem_info_t * _sys_get_mem_info();
 
 #endif

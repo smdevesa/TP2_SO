@@ -1,13 +1,10 @@
-//
-// Created by Santiago Devesa on 21/09/2024.
-//
-
 #ifndef UNTITLED_MEMORY_MANAGER_H
 #define UNTITLED_MEMORY_MANAGER_H
-#define MEM_SIZE 1048576
-#define MIN_SIZE 32
 
 #include <stdint.h>
+
+#define MEM_SIZE 1048576
+#define MIN_SIZE 32
 
 typedef struct mem_info{
     uint64_t total_mem;
