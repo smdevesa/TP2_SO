@@ -123,16 +123,7 @@ void * schedule(void *prevRSP) {
     scheduler->current = nextProcess->pid;
     uint64_t nextRSP = (uint64_t)nextProcess->stackPos;
     nextProcess->status = RUNNING;
-
-    char current[10];
-    itoa(nextProcess->pid, current);
-    for(int i=0; i<10; i++) {
-        drawRectangle(0x00000000, 980+(i*8), 5, 8, 16);
-    }
-    for(int i=0; current[i] != 0; i++) {
-        drawChar(current[i], 0x0000FF00, 0x00000000, 980+(i*8), 5);
-    }
-
+    
     return (void *)nextRSP;
 }
 
