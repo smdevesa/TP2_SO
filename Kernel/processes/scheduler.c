@@ -10,7 +10,6 @@
 #include <stddef.h>
 #include <syscall_lib.h>
 #include <time.h>
-#include <videoDriver.h>
 
 extern void _hlt();
 extern void _forceNextProcess();
@@ -127,6 +126,9 @@ void *schedule(void *prevRSP) {
 	}
 
 	process_t *nextProcess = getNextProcess();
+    if(nextProcess == NULL) {
+        return prevRSP;
+    }
 	scheduler->current = nextProcess->pid;
 	uint64_t nextRSP = (uint64_t) nextProcess->stackPos;
 	nextProcess->status = RUNNING;

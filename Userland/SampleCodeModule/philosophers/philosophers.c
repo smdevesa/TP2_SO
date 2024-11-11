@@ -12,8 +12,8 @@
 #define THINKING_TICKS 5
 #define MIN_PHILOSOPHERS 3
 #define MUTEX "philo_mutex_id"
-#define LEFT(i) ((i + numbPhilosophers - 1) % numbPhilosophers)
-#define RIGHT(i) ((i + 1) % numbPhilosophers)
+#define LEFT(i) (((i) + numbPhilosophers - 1) % numbPhilosophers)
+#define RIGHT(i) (((i) + 1) % numbPhilosophers)
 
 #define ADD 'a'
 #define REMOVE 'r'

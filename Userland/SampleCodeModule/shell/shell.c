@@ -68,7 +68,7 @@ void shell() {
 }
 
 static void getInputAndPrint(char *input) {
-	char c;
+	int c;
 	int i = 0;
 	int count = 0;
 	printCursor(CURSOR_COLOR, 0);

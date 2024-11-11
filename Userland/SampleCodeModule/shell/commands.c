@@ -140,6 +140,8 @@ int parseCommand(char *input) {
 						commands[j].function, executable_commands[i].args,
 						executable_commands[i].command, 0, executable_commands[i].fds);
 					if (executable_commands[i].pid == -1) {
+                        printError(executable_commands[i].command,
+                                   "Error creating process.", NULL);
 						return ERROR;
 					}
 				}

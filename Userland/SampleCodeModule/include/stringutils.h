@@ -39,6 +39,12 @@ void strncpy(char *dest, const char *src, size_t n);
  */
 void reverse(char *str);
 
+/**
+ * @brief Concatenates two null-terminated strings.
+ * @param dest The destination buffer.
+ * @param src The source buffer.
+ * @return A pointer to the destination buffer.
+ */
 char *strcat(char *dest, const char *src);
 
 /**

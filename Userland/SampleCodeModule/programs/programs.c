@@ -17,7 +17,7 @@ int cat(int argc, char **argv) {
 		return -1;
 	}
 
-	char c;
+	int c;
 	while ((c = getchar()) != EOF) {
 		if (c)
 			putchar(c);
@@ -71,7 +71,7 @@ int filter(int argc, char **argv) {
 		return -1;
 	}
 
-	char c;
+	int c;
 	while ((c = getchar()) != EOF) {
 		if (is_vowel_or_line_break(c))
 			putchar(c);
@@ -87,7 +87,7 @@ int wc(int argc, char **argv) {
 	}
 
 	int lines = 1;
-	char c;
+	int c;
 	while ((c = getchar()) != EOF) {
 		if (c == '\n') {
 			lines++;

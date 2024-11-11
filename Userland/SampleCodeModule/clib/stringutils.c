@@ -21,7 +21,7 @@ void strcpy(char *dest, const char *src) {
 
 void strncpy(char *dest, const char *src, size_t n) {
 	size_t i = 0;
-	while (src[i] != 0 && i < n) {
+	while (i < n && src[i] != 0) {
 		dest[i] = src[i];
 		i++;
 	}
