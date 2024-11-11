@@ -8,6 +8,7 @@
 #include <semaphore.h>
 #include <pipes.h>
 #include <time.h>
+#include <memoryPositions.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
