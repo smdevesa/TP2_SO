@@ -47,7 +47,7 @@ static int initProcessMain(int argc, char **argv) {
                 }
             }
         }
-        yield();
+        _hlt();
     }
     return 0;
 }

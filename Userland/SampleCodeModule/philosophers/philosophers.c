@@ -8,7 +8,7 @@
 #define STDIN 0
 #define STDOUT 1
 #define MAX_PHILOSOPHERS 15
-#define THINKING_TICKS 1000
+#define THINKING_TICKS 5
 #define MIN_PHILOSOPHERS 3
 #define MUTEX "philo_mutex_id"
 #define LEFT(i) ((i + numbPhilosophers - 1) % numbPhilosophers)
@@ -48,6 +48,7 @@ static void takeForks(int i);
 static void showState();
 static void test(int i);
 static void instructions();
+static void set_own_priority_to_max();
 
 void philosopherProgram(int argc, char * argv[]) {
     if(_sys_semOpen(MUTEX, 1) == -1) { //genero el semaforo general
@@ -61,6 +62,8 @@ void philosopherProgram(int argc, char * argv[]) {
     }
 
     instructions();
+
+    set_own_priority_to_max();
     while(getchar() != START);
 
 
@@ -126,6 +129,7 @@ static int addPhilosopher(int i){
         printStringColor("Error creating philosopher\n", RED_COLOR);
         return -1;
     }
+    _sys_changePriority(philosophers[i].pid, 4);
     numbPhilosophers++;
 
     showState();
@@ -229,3 +233,6 @@ static void instructions(){
         printStringColor("Press 's' to start the philosophers program !\n\n", ORANGE_COLOR);
 }
 
+static void set_own_priority_to_max(){
+    _sys_changePriority(_sys_getpid(), 4);
+}

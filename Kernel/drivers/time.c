@@ -1,14 +1,15 @@
 #include "../include/time.h"
 #include <scheduler.h>
+#include <stdint.h>
 
-static unsigned long ticks = 0;
 typedef struct sleeping {
-    uint64_t ticks;
-    uint64_t start_tick;
+    uint64_t end_tick;
     int32_t pid;
 } sleeping_process_t;
 
 static sleeping_process_t sleeping_processes[MAX_PROCESSES];
+static uint64_t ticks = 0;
+static uint64_t next_tick_check = UINT64_MAX;
 
 static void unblock_sleeping_processes();
 
@@ -38,11 +39,16 @@ void init_sleeping_processes() {
 }
 
 static void unblock_sleeping_processes() {
+    if(ticks < next_tick_check) return;
+
+    next_tick_check = UINT64_MAX;
     for (int i = 0; i < MAX_PROCESSES; i++) {
-        if (sleeping_processes[i].pid != -1 &&
-            sleeping_processes[i].ticks > 0 && (sleeping_processes[i].start_tick + sleeping_processes[i].ticks) <= ticks) {
+        if (sleeping_processes[i].pid != -1 && sleeping_processes[i].end_tick <= ticks) {
             unblockProcess(sleeping_processes[i].pid);
             sleeping_processes[i].pid = -1;
+        }
+        else if(sleeping_processes[i].pid != -1 && sleeping_processes[i].end_tick < next_tick_check) {
+            next_tick_check = sleeping_processes[i].end_tick;
         }
     }
 }
@@ -53,12 +59,8 @@ void remove_sleeping_process(uint32_t pid) {
 
 void sleep(uint64_t sleep_ticks) {
     uint32_t pid = getPid();
-    sleeping_processes[pid].ticks = sleep_ticks;
-    sleeping_processes[pid].start_tick = ticks;
+    sleeping_processes[pid].end_tick = ticks + sleep_ticks;
     sleeping_processes[pid].pid = pid;
+    if(sleeping_processes[pid].end_tick < next_tick_check) next_tick_check = sleeping_processes[pid].end_tick;
     block_process_sleep(pid, 1);
-}
-
-uint8_t is_sleeping(uint32_t pid) {
-    return sleeping_processes[pid].pid != -1 && (sleeping_processes[pid].start_tick + sleeping_processes[pid].ticks) > ticks;
 }

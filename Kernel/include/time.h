@@ -10,6 +10,5 @@ uint64_t ms_elapsed();
 void init_sleeping_processes();
 void remove_sleeping_process(uint32_t pid);
 void sleep(uint64_t sleep_ticks);
-uint8_t is_sleeping(uint32_t pid);
 
 #endif
