@@ -86,7 +86,7 @@ int wc(int argc, char **argv) {
 		return -1;
 	}
 
-	int lines = 1;
+	int lines = 0;
 	int c;
 	while ((c = getchar()) != EOF) {
 		if (c == '\n') {
@@ -105,7 +105,7 @@ int mem(int argc, char **argv) {
 	}
 
 	mem_info_t *mem_info = _sys_get_mem_info();
-	printf("Total memory: %d\nUsed memory: %d\nFree memory: %d\n",
+	printf("Total memory: %d bytes\nUsed memory: %d bytes\nFree memory: %d bytes\n",
 		   mem_info->total_mem, mem_info->used_mem, mem_info->free_mem);
 	return 0;
 }
